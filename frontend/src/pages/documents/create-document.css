@@ -1,0 +1,198 @@
+.create-document-page {
+  width: 100%;
+}
+
+.create-document-page .page-header {
+  margin-bottom: 1.5rem;
+}
+
+.create-document-content {
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.create-document-card {
+  overflow: hidden;
+}
+
+.create-document-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem 1.75rem 0;
+}
+
+.create-document-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-light), rgba(14, 165, 233, 0.12));
+  color: var(--color-primary);
+  border: 1px solid rgba(59, 108, 245, 0.2);
+}
+
+.create-document-card-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.create-document-card-header p {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.create-document-card-body {
+  padding: 1.5rem 1.75rem 0;
+  display: block;
+}
+
+.create-document-card-body .form-grid {
+  gap: 1.25rem;
+}
+
+.create-document-card .upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 168px;
+  padding: 1.75rem 1.5rem;
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.create-document-card .upload-zone:hover:not(.upload-zone--has-file) {
+  border-color: rgba(59, 108, 245, 0.45);
+  background: var(--color-primary-light);
+  box-shadow: inset 0 0 0 1px rgba(59, 108, 245, 0.08);
+}
+
+.create-document-card .upload-zone--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.create-document-card .upload-zone--has-file {
+  border-style: solid;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.create-document-card .upload-zone--error {
+  border-color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.create-document-card .upload-zone-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.create-document-card .upload-zone--has-file .upload-zone-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--color-success);
+}
+
+.create-document-card .upload-zone > p {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.create-document-card .upload-hint {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.create-document-card .upload-file-name {
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+.create-document-card .upload-remove {
+  margin-top: 0.85rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.create-document-card .upload-remove:hover:not(:disabled) {
+  background: var(--color-primary-light);
+  text-decoration: none;
+}
+
+.create-document-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem -1.75rem 0;
+  padding: 1rem 1.75rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme='dark'] .create-document-card-footer {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.create-document-card-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-left: auto;
+}
+
+.create-document-card-footer a {
+  text-decoration: none;
+}
+
+.create-document-card-footer a:hover {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .create-document-card-header,
+  .create-document-card-body {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .create-document-card-footer {
+    margin-left: -1.25rem;
+    margin-right: -1.25rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .create-document-card-footer-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .create-document-card-footer-actions .btn {
+    flex: 1;
+  }
+}

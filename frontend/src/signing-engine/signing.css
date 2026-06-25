@@ -1,0 +1,901 @@
+.signing-engine {
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.signing-engine-embedded {
+  min-height: 400px;
+}
+
+.signing-engine-embedded .signing-layout {
+  min-height: 400px;
+}
+
+/* Portal iframe embed — fill parent height and scroll the PDF inside */
+.signing-engine-iframe {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.signing-embed-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.signing-embed-chrome {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding: 0.65rem 1rem;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 6%);
+}
+
+.signing-embed-chrome-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.signing-embed-title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signing-embed-counter-sign {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.signing-embed-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 16rem;
+}
+
+.signing-embed-progress-bar {
+  flex: 1;
+  min-width: 4rem;
+}
+
+.signing-embed-progress-row .progress-text {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.signing-embed-finish-btn {
+  flex-shrink: 0;
+}
+
+.signing-embed-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.signing-engine-iframe .signing-document-viewer {
+  max-width: 52rem;
+}
+
+.signing-engine-iframe .signing-document-viewer--all-pages {
+  max-width: none;
+}
+
+.signing-engine-iframe .pdf-page-nav {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 0.75rem;
+  padding: 0.35rem 0 0.5rem;
+  background: #f1f5f9;
+}
+
+body.signing-portal {
+  background: var(--color-bg);
+}
+
+.signing-loading,
+.signing-error {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.signing-brand {
+  padding: 1rem 2rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.signing-brand img {
+  height: 32px;
+}
+
+.signing-layout {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+.signing-sidebar {
+  width: 300px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-right: 1px solid var(--glass-border);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.signing-sidebar h3 {
+  font-size: 1rem;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.progress-bar {
+  height: 8px;
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), #0ea5e9);
+  border-radius: var(--radius);
+  transition: width 0.3s;
+  box-shadow: 0 0 12px rgba(59, 108, 245, 0.45);
+}
+
+.progress-text {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.current-field-info {
+  padding: 1rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-step {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.sidebar-nav-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.field-checklist {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+}
+
+.field-checklist li {
+  padding: 0.4rem 0;
+  color: var(--color-text-muted);
+}
+
+.field-checklist li.done {
+  color: var(--color-success);
+}
+
+.field-checklist li.current {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.signing-viewer {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem;
+  overflow: auto;
+}
+
+.signing-doc-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.signing-counter-sign-notice {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.signing-progress-badge {
+  padding: 0.35rem 0.75rem;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-radius: var(--radius);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.signing-document-viewer {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.signing-document-viewer--all-pages {
+  width: 100%;
+  max-width: 52rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.signing-page-nav-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin: 0 auto 0.25rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  color: #f8fafc;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background: rgb(15 23 42 / 88%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 28%);
+}
+
+.signing-page-nav-label {
+  min-width: 6.5rem;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.signing-engine-iframe .signing-page-nav-sticky {
+  top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.signing-document-viewer--all-pages .signing-page-nav-sticky .btn {
+  color: #e2e8f0;
+  border-color: rgb(255 255 255 / 18%);
+  background: rgb(255 255 255 / 8%);
+}
+
+.signing-document-viewer--all-pages .signing-page-nav-sticky .btn:hover:not(:disabled) {
+  background: rgb(255 255 255 / 16%);
+  border-color: rgb(255 255 255 / 28%);
+}
+
+.signing-document-viewer--all-pages .signing-page-nav-sticky .btn:disabled {
+  opacity: 0.45;
+}
+
+.signing-document-viewer--all-pages .signing-pdf-page {
+  flex-shrink: 0;
+}
+
+.signing-pdf-page-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+}
+
+.signing-all-pages-loading {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.signing-document-viewer .pdf-page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.signing-pdf-page {
+  position: relative;
+  width: 100%;
+  background: white;
+  box-shadow: var(--shadow-lg);
+}
+
+.signing-pdf-page:has(.pdf-canvas) {
+  aspect-ratio: auto;
+}
+
+.signing-pdf-page:has(.pdf-placeholder) {
+  aspect-ratio: 8.5 / 11;
+  min-height: 320px;
+}
+
+.signing-pdf-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.signing-pdf-content .pdf-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: top;
+}
+
+.signing-pdf-content .pdf-loading,
+.signing-pdf-content .pdf-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-muted);
+  z-index: 2;
+}
+
+.signing-pdf-content .pdf-loading {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.signing-field {
+  position: absolute;
+  z-index: 1;
+  border: 2px dashed;
+  border-radius: var(--radius);
+  background: rgba(37, 99, 235, 0.08);
+  font-size: 0.65rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.signing-field--signature {
+  cursor: pointer;
+}
+
+.signing-field-signature-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.signing-field-signature-content .signing-field-image {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  width: auto;
+  max-width: 70%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.signing-field-signature-content .signing-field-text {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 68%;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+  font-size: 1.2em;
+}
+
+.signing-field-timestamp {
+  flex: 0 0 auto;
+  font-size: 0.5rem;
+  line-height: 1;
+  color: #64748b;
+  white-space: nowrap;
+  text-align: right;
+  padding: 0;
+}
+
+.signing-field--readonly {
+  pointer-events: none;
+  background: rgba(241, 245, 249, 0.85);
+  border-style: solid;
+  opacity: 0.95;
+}
+
+.signing-field--readonly .signing-field-text {
+  font-size: 0.85rem;
+  color: #334155;
+  padding: 2px 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  width: 100%;
+}
+
+.signing-field--input,
+.signing-field--checkbox,
+.signing-field--radio {
+  padding: 0;
+}
+
+.signing-field-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: inherit;
+  color: #1e293b;
+  padding: 0.15rem 0.25rem;
+  outline: none;
+  min-width: 0;
+}
+
+.signing-field-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.85;
+}
+
+.signing-field-input:focus {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.signing-field--radio {
+  padding: 0.2rem 0.35rem;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.signing-field-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+
+.signing-field-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  font-size: 0.7rem;
+  color: #1e293b;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.signing-field-radio-option input {
+  width: 0.85rem;
+  height: 0.85rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.signing-field-checkbox,
+.signing-field-radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.signing-field-checkbox input,
+.signing-field-radio input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.signing-field-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.signing-field-text {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.15rem;
+}
+
+.signing-field.active {
+  border-style: solid;
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.signing-field.filled {
+  background: rgba(22, 163, 74, 0.12);
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+.signature-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.signature-tab {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.signature-tab.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.canvas-area {
+  height: 150px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  margin-top: 0.5rem;
+}
+
+.signature-pad {
+  position: relative;
+  height: 150px;
+  margin-top: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  overflow: hidden;
+}
+
+.signature-pad-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.signature-pad-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.signature-pad-clear {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.signature-canvas p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.signature-type-input {
+  width: 100%;
+  padding: 0.5625rem 0.875rem;
+  min-height: 2.375rem;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  background: var(--input-bg);
+  color: var(--color-text);
+  box-shadow: var(--input-shadow);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.signature-type-input:hover:not(:disabled):not(:focus) {
+  border-color: var(--input-border-hover);
+  background: var(--input-bg-hover);
+}
+
+.signature-type-input:focus {
+  outline: none;
+  border-color: var(--input-border-focus);
+  background: var(--input-bg-hover);
+  box-shadow: var(--input-focus-ring), var(--input-shadow);
+}
+
+.signature-preview {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  text-align: center;
+  font-family: 'Segoe Script', cursive;
+  font-size: 1.5rem;
+  border-bottom: 2px solid var(--color-text);
+}
+
+.embedded-demo {
+  padding: 1.5rem;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.embedded-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 2rem;
+}
+
+.embedded-modal {
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+
+.embedded-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--color-sidebar);
+  color: white;
+  font-weight: 600;
+}
+
+.embedded-modal-header button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.completion-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.completion-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  text-align: center;
+  max-width: 480px;
+  box-shadow: var(--shadow-lg);
+}
+
+.completion-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.completion-timestamp {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.completion-note {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin-top: 1rem;
+}
+
+.completion-error {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-danger, #dc2626);
+}
+
+.completion-link {
+  display: block;
+  margin-top: 2rem;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.signing-profile-step {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.signing-profile-step-card {
+  width: min(100%, 560px);
+  padding: 2rem;
+}
+
+.signing-profile-step-card h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.signing-profile-step-intro {
+  margin: 0 0 1.25rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.signing-profile-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.signing-profile-step-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.signing-profile-step-option:hover {
+  border-color: var(--color-primary);
+}
+
+.signing-profile-step-option--selected {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.signing-profile-step-dot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+.signing-profile-step-label {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.signing-profile-step-error {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--color-danger, #dc2626);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .signing-layout {
+    flex-direction: column;
+  }
+
+  .signing-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .signing-embed-chrome {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .signing-embed-finish-btn {
+    width: 100%;
+  }
+
+  .signing-embed-progress-row {
+    max-width: none;
+  }
+}
