@@ -15,16 +15,25 @@ const STATUS_ICONS: Record<RecipientSigningStatus, LucideIcon> = {
 interface RecipientSigningStatusBadgeProps {
   status: RecipientSigningStatus
   timestamp?: string
+  layout?: 'inline' | 'stacked'
 }
 
-export function RecipientSigningStatusBadge({ status, timestamp }: RecipientSigningStatusBadgeProps) {
+export function RecipientSigningStatusBadge({
+  status,
+  timestamp,
+  layout = 'inline',
+}: RecipientSigningStatusBadgeProps) {
   const label = getRecipientSigningStatusLabel(status)
   const Icon = STATUS_ICONS[status]
 
   if (!label) return null
 
   return (
-    <span className="recipient-status-badge-group">
+    <span
+      className={`recipient-status-badge-group${
+        layout === 'stacked' ? ' recipient-status-badge-group--stacked' : ''
+      }`}
+    >
       <span className={`recipient-status-badge recipient-status-${status}`}>
         <Icon className="recipient-status-badge-icon" size={12} strokeWidth={2.25} aria-hidden />
         {label}

@@ -14,15 +14,17 @@ export function RecipientList({ recipients, emptyMessage = 'No recipients assign
     <ul className="recipient-list">
       {recipients.map((recipient) => (
         <li key={recipient.id} style={{ borderLeftColor: recipient.color }}>
-          <div className="recipient-list-main">
-            <div className="recipient-list-title-row">
-              <strong className="recipient-list-label">{recipient.name}</strong>
-            </div>
-            <div className="recipient-list-meta">
-              <span className="recipient-list-role-chip">
-                {recipient.role.replace('_', ' ')}
-              </span>
-              <span className="recipient-list-meta-text">{recipient.email}</span>
+          <div className="recipient-list-card">
+            <div className="recipient-list-body">
+              <div className="recipient-list-title-group">
+                <strong className="recipient-list-label">{recipient.name}</strong>
+              </div>
+              <div className="recipient-list-meta">
+                <span className="recipient-list-role-chip">
+                  {recipient.role.replace('_', ' ')}
+                </span>
+                <span className="recipient-list-meta-text">{recipient.email}</span>
+              </div>
             </div>
           </div>
         </li>

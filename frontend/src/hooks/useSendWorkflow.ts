@@ -5,6 +5,7 @@ import { api } from '../api/client'
 import type { Document, EmailAttachment, WorkflowType } from '../types'
 import { canSendForSignature } from '../utils/documentSend'
 import { buildInitialSigningOrder, orderRecipientsBySigningOrder } from '../utils/signingOrder'
+import { getErrorMessage, toast } from '../utils/toast'
 
 const DEFAULT_MESSAGE_HTML = [
   '<p>Hi,</p>',
@@ -25,7 +26,6 @@ export function useSendWorkflow(documentId: string, document?: Document) {
   const [attachments, setAttachments] = useState<EmailAttachment[]>(document?.emailAttachments ?? [])
   const [sending, setSending] = useState(false)
   const [uploadingAttachments, setUploadingAttachments] = useState(false)
-  const [attachmentError, setAttachmentError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!document) return
@@ -58,7 +58,6 @@ export function useSendWorkflow(documentId: string, document?: Document) {
 
   const addAttachments = useCallback(
     async (files: FileList) => {
-      setAttachmentError(null)
       setUploadingAttachments(true)
 
       try {
@@ -68,10 +67,13 @@ export function useSendWorkflow(documentId: string, document?: Document) {
           uploaded.push(attachment)
         }
         setAttachments((current) => [...current, ...uploaded])
+        if (uploaded.length === 1) {
+          toast.success('Attachment added.')
+        } else if (uploaded.length > 1) {
+          toast.success(`${uploaded.length} attachments added.`)
+        }
       } catch (error) {
-        setAttachmentError(
-          error instanceof Error ? error.message : 'Failed to upload attachment.',
-        )
+        toast.error(getErrorMessage(error, 'Failed to upload attachment.'))
       } finally {
         setUploadingAttachments(false)
       }
@@ -81,16 +83,14 @@ export function useSendWorkflow(documentId: string, document?: Document) {
 
   const removeAttachment = useCallback(
     async (attachmentId: string) => {
-      setAttachmentError(null)
       setUploadingAttachments(true)
 
       try {
         await api.documents.deleteEmailAttachment(documentId, attachmentId)
         setAttachments((current) => current.filter((item) => item.id !== attachmentId))
+        toast.success('Attachment removed.')
       } catch (error) {
-        setAttachmentError(
-          error instanceof Error ? error.message : 'Failed to remove attachment.',
-        )
+        toast.error(getErrorMessage(error, 'Failed to remove attachment.'))
       } finally {
         setUploadingAttachments(false)
       }
@@ -119,7 +119,10 @@ export function useSendWorkflow(documentId: string, document?: Document) {
       queryClient.setQueryData(['document', documentId], updatedDocument)
       await queryClient.invalidateQueries({ queryKey: ['documents'] })
       await queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+      toast.success('Document sent for signature.')
       navigate('/documents')
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Unable to send document for signature.'))
     } finally {
       setSending(false)
     }
@@ -137,7 +140,6 @@ export function useSendWorkflow(documentId: string, document?: Document) {
     setMessage,
     attachments,
     uploadingAttachments,
-    attachmentError,
     addAttachments,
     removeAttachment,
     sending,

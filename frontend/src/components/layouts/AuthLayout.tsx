@@ -14,29 +14,35 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="auth-layout">
       <div className="auth-panel">
-        <div className="auth-brand">
-          <span className="brand-icon-wrap" aria-hidden>
-            <PenLine size={18} strokeWidth={2.25} />
-          </span>
-          <AppBrand />
+        <div className="auth-panel-inner">
+          <header className="auth-header">
+            <div className="auth-brand">
+              <span className="brand-icon-wrap" aria-hidden>
+                <PenLine size={18} strokeWidth={2.25} />
+              </span>
+              <AppBrand />
+            </div>
+            <p className="auth-tagline">Multi-tenant e-signature platform</p>
+          </header>
+          <div className="auth-content">{children}</div>
         </div>
-        <p className="auth-tagline">Multi-tenant e-signature platform</p>
-        {children}
       </div>
       <div className="auth-hero">
-        <h2>Sign documents anywhere</h2>
-        <p>
-          Manage workflows, embed signing into your apps, and white-label the experience — all
-          from one platform.
-        </p>
-        <ul className="auth-features">
-          {AUTH_FEATURES.map((feature) => (
-            <li key={feature}>
-              <CheckCircle2 size={18} strokeWidth={2} />
-              {feature}
-            </li>
-          ))}
-        </ul>
+        <div className="auth-hero-inner">
+          <h2>Sign documents anywhere</h2>
+          <p>
+            Manage workflows, embed signing into your apps, and white-label the experience — all
+            from one platform.
+          </p>
+          <ul className="auth-features">
+            {AUTH_FEATURES.map((feature) => (
+              <li key={feature}>
+                <CheckCircle2 size={18} strokeWidth={2} />
+                {feature}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   )

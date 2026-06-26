@@ -13,6 +13,7 @@
     "start": "node --watch dist/server.js",
     "migrate": "tsx scripts/migrate.ts",
     "seed": "tsx scripts/seed.ts",
+    "reset-db": "tsx scripts/reset-db.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

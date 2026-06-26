@@ -4,19 +4,31 @@ import { hashPassword } from '../src/utils/password';
 const ADMIN_EMAIL = 'admin@work.com';
 const ADMIN_PASSWORD = '12345678';
 
-async function seed(): Promise<void> {
+async function resetDb(): Promise<void> {
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
 
-    const existingUser = await client.query('SELECT id FROM users WHERE email = $1', [ADMIN_EMAIL]);
-
-    if (existingUser.rows.length > 0) {
-      console.log(`Admin user ${ADMIN_EMAIL} already exists — nothing to seed.`);
-      await client.query('COMMIT');
-      return;
-    }
+    await client.query(`
+      TRUNCATE TABLE
+        application_logs,
+        password_reset_tokens,
+        auth_tokens,
+        signing_sessions,
+        document_fields,
+        document_recipients,
+        documents,
+        api_keys,
+        webhooks,
+        invoices,
+        usage_metrics,
+        team_invites,
+        sdk_configs,
+        users,
+        organizations
+      RESTART IDENTITY CASCADE
+    `);
 
     const passwordHash = await hashPassword(ADMIN_PASSWORD);
     const orgResult = await client.query(
@@ -34,7 +46,9 @@ async function seed(): Promise<void> {
     );
 
     await client.query('COMMIT');
-    console.log(`Seeded admin user: ${ADMIN_EMAIL}`);
+    console.log('Database reset complete.');
+    console.log(`Admin user: ${ADMIN_EMAIL}`);
+    console.log(`Password: ${ADMIN_PASSWORD}`);
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;
@@ -43,9 +57,9 @@ async function seed(): Promise<void> {
   }
 }
 
-seed()
+resetDb()
   .catch((error) => {
-    console.error('Seed failed:', error);
+    console.error('Reset failed:', error);
     process.exitCode = 1;
   })
   .finally(async () => {

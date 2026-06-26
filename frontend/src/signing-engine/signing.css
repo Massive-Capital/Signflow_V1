@@ -472,9 +472,15 @@ body.signing-portal {
 
 .signing-field--readonly {
   pointer-events: none;
-  background: rgba(241, 245, 249, 0.85);
+  background: transparent;
   border-style: solid;
-  opacity: 0.95;
+  opacity: 1;
+}
+
+.signing-field--readonly.filled {
+  border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
+  background: transparent;
+  box-shadow: none;
 }
 
 .signing-field--readonly .signing-field-text {

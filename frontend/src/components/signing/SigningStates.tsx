@@ -13,6 +13,7 @@ import {
   showBlobInPreviewTab,
 } from '../../utils/pdf'
 import { formatDisplayDateTime } from '../../utils/date'
+import { toast } from '../../utils/toast'
 
 interface CompletionCardProps {
   title?: string
@@ -27,7 +28,6 @@ export function CompletionCard({
 }: CompletionCardProps) {
   const [downloading, setDownloading] = useState(false)
   const [previewing, setPreviewing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [inlinePreview, setInlinePreview] = useState<{ title: string; url: string } | null>(null)
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export function CompletionCard({
 
   const handlePreview = async () => {
     if (!token) {
-      setError('Signed document preview is not available.')
+      toast.error('Signed document preview is not available.')
       return
     }
 
@@ -58,7 +58,6 @@ export function CompletionCard({
     const previewTitle = `${title ?? 'Document'} — signed copy`
 
     setPreviewing(true)
-    setError(null)
 
     try {
       const blob = await api.signing.previewSigned(token)
@@ -91,7 +90,7 @@ export function CompletionCard({
       }
     } catch {
       previewTab?.close()
-      setError('Unable to preview the signed document. Please try again.')
+      toast.error('Unable to preview the signed document. Please try again.')
     } finally {
       setPreviewing(false)
     }
@@ -99,17 +98,17 @@ export function CompletionCard({
 
   const handleDownload = async () => {
     if (!token) {
-      setError('Signed document is not available for download.')
+      toast.error('Signed document is not available for download.')
       return
     }
 
     setDownloading(true)
-    setError(null)
 
     try {
       await downloadSignedDocumentCopy(token, title ?? 'document')
+      toast.success('Signed copy downloaded.')
     } catch {
-      setError('Unable to download the signed document. Please try again.')
+      toast.error('Unable to download the signed document. Please try again.')
     } finally {
       setDownloading(false)
     }
@@ -159,7 +158,6 @@ export function CompletionCard({
             {downloading ? 'Downloading...' : 'Download copy'}
           </Button>
         </div>
-        {error && <p className="completion-error">{error}</p>}
         <p className="completion-note">A confirmation email has been sent to your inbox.</p>
         <Link to="/login" className="completion-link">
           Powered by {APP_NAME}

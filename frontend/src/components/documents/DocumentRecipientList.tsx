@@ -13,6 +13,7 @@ import {
 } from '../../utils/pdf'
 import { shouldShowRecipientSigningStatus, getRecipientSigningTimestamp } from '../../utils/recipientSigningStatus'
 import { sortRecipientsByOrder } from '../../utils/signingOrder'
+import { toast } from '../../utils/toast'
 import type { DocumentField, DocumentStatus, Recipient, WorkflowType } from '../../types'
 
 interface DocumentRecipientListProps {
@@ -41,7 +42,6 @@ export function DocumentRecipientList({
   fields,
 }: DocumentRecipientListProps) {
   const [loadingRecipientId, setLoadingRecipientId] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
   const [inlinePreview, setInlinePreview] = useState<{ title: string; url: string } | null>(
     null,
   )
@@ -72,7 +72,6 @@ export function DocumentRecipientList({
     const useInlinePreview = !previewTab
 
     setLoadingRecipientId(recipient.id)
-    setActionError(null)
 
     try {
       const blob = await api.documents.previewRecipient(documentId, recipient.id)
@@ -106,7 +105,7 @@ export function DocumentRecipientList({
       }
     } catch {
       previewTab?.close()
-      setActionError(`Unable to preview the document for ${recipient.name}.`)
+      toast.error(`Unable to preview the document for ${recipient.name}.`)
     } finally {
       setLoadingRecipientId(null)
     }
@@ -116,7 +115,6 @@ export function DocumentRecipientList({
     if (!recipient.signed) return
 
     setLoadingRecipientId(recipient.id)
-    setActionError(null)
 
     try {
       const safeTitle = documentTitle.replace(/[<>:"/\\|?*]+/g, '_').trim() || 'document'
@@ -126,8 +124,9 @@ export function DocumentRecipientList({
         recipient.id,
         `${safeTitle}-${safeName}-signed.pdf`,
       )
+      toast.success(`Downloaded signed copy for ${recipient.name}.`)
     } catch {
-      setActionError(`Unable to download the document for ${recipient.name}.`)
+      toast.error(`Unable to download the document for ${recipient.name}.`)
     } finally {
       setLoadingRecipientId(null)
     }
@@ -157,8 +156,6 @@ export function DocumentRecipientList({
         )}
       </Modal>
 
-      {actionError && <p className="document-download-error">{actionError}</p>}
-
       <ul className="recipient-list">
         {orderedRecipients.map((recipient, index) => {
           const filled = recipientFilledCount(recipient.id, fields)
@@ -172,10 +169,15 @@ export function DocumentRecipientList({
               ? 'Complete counter-signature using the email sent after the investor signed'
               : 'Available after this recipient signs'
 
+          const showStatus =
+            shouldShowRecipientSigningStatus(documentStatus, recipient.signingStatus) &&
+            recipient.signingStatus
+          const hasAside = showStatus || showActions
+
           return (
             <li key={recipient.id} style={{ borderLeftColor: recipient.color }}>
-              <div className="recipient-list-main">
-                <div className="recipient-list-title-row">
+              <div className="recipient-list-card">
+                <div className="recipient-list-body">
                   <div className="recipient-list-title-group">
                     {workflowType === 'sequential' && (
                       <span
@@ -187,56 +189,61 @@ export function DocumentRecipientList({
                     )}
                     <strong className="recipient-list-label">{recipient.name}</strong>
                   </div>
-                  {shouldShowRecipientSigningStatus(documentStatus, recipient.signingStatus) &&
-                    recipient.signingStatus && (
+
+                  <div className="recipient-list-meta">
+                    <span className="recipient-list-role-chip">{formatRecipientRole(recipient.role)}</span>
+                    <span className="recipient-list-meta-text">{recipient.email}</span>
+                    {showActions && total > 0 && recipient.signingStatus !== 'signed' && (
+                      <span className="recipient-list-field-count">
+                        {`${filled} of ${total} field${total === 1 ? '' : 's'} completed`}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {hasAside && (
+                  <div className="recipient-list-aside">
+                    {showStatus && recipient.signingStatus && (
                       <RecipientSigningStatusBadge
                         status={recipient.signingStatus}
                         timestamp={getRecipientSigningTimestamp(
                           recipient.signingStatus,
                           recipient,
                         )}
+                        layout="stacked"
                       />
                     )}
-                </div>
 
-                <div className="recipient-list-meta">
-                  <span className="recipient-list-role-chip">{formatRecipientRole(recipient.role)}</span>
-                  <span className="recipient-list-meta-text">{recipient.email}</span>
-                  {showActions && total > 0 && recipient.signingStatus !== 'signed' && (
-                    <span className="recipient-list-field-count">
-                      {`${filled} of ${total} field${total === 1 ? '' : 's'} completed`}
-                    </span>
-                  )}
-                </div>
-
-                {showActions && (
-                  <div className="recipient-list-actions">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      icon={Eye}
-                      disabled={!canAccessSignedCopy || isLoading}
-                      title={disabledTitle}
-                      onClick={() => handlePreview(recipient)}
-                    >
-                      Preview
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      icon={Download}
-                      disabled={!canAccessSignedCopy || isLoading}
-                      title={
-                        canAccessSignedCopy
-                          ? undefined
-                          : 'Available after this recipient signs'
-                      }
-                      onClick={() => handleDownload(recipient)}
-                    >
-                      Download
-                    </Button>
+                    {showActions && (
+                      <div className="recipient-list-actions">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          icon={Eye}
+                          disabled={!canAccessSignedCopy || isLoading}
+                          title={disabledTitle}
+                          onClick={() => handlePreview(recipient)}
+                        >
+                          Preview
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          icon={Download}
+                          disabled={!canAccessSignedCopy || isLoading}
+                          title={
+                            canAccessSignedCopy
+                              ? undefined
+                              : 'Available after this recipient signs'
+                          }
+                          onClick={() => handleDownload(recipient)}
+                        >
+                          Download
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

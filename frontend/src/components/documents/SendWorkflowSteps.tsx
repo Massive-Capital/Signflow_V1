@@ -35,7 +35,6 @@ interface SendWorkflowStepsProps {
   message: string
   attachments: EmailAttachment[]
   uploadingAttachments: boolean
-  attachmentError: string | null
   sending: boolean
   onWorkflowTypeChange: (type: WorkflowType) => void
   onSigningOrderChange: (order: string[]) => void
@@ -113,7 +112,6 @@ export function SendWorkflowSteps({
   message,
   attachments,
   uploadingAttachments,
-  attachmentError,
   sending,
   onWorkflowTypeChange,
   onSigningOrderChange,
@@ -294,7 +292,6 @@ export function SendWorkflowSteps({
                 onAdd={onAddAttachments}
                 onRemove={onRemoveAttachment}
               />
-              {attachmentError && <p className="send-email-attachment-error">{attachmentError}</p>}
             </div>
           </div>
         )}

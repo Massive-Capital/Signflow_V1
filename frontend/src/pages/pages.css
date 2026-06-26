@@ -42,24 +42,29 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
-.recipient-list-main {
+.recipient-list-card {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   min-width: 0;
 }
 
-.recipient-list-title-row {
+.recipient-list-body {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.45rem;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.recipient-list-title-row .recipient-status-badge-group {
-  justify-content: flex-end;
-  margin-left: auto;
+.recipient-list-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  min-width: 11.5rem;
 }
 
 .recipient-list-title-group {
@@ -138,12 +143,24 @@
   row-gap: 0.125rem;
 }
 
+.recipient-status-badge-group--stacked {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
 .recipient-status-timestamp {
   font-size: 0.6875rem;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--color-text-muted);
   white-space: nowrap;
+  text-align: right;
+}
+
+.recipient-status-badge-group--stacked .recipient-status-timestamp {
+  white-space: normal;
+  max-width: 100%;
 }
 
 .recipient-status-timestamp::before {
@@ -151,6 +168,11 @@
   margin-right: 0.35rem;
   color: var(--color-text-muted);
   opacity: 0.65;
+}
+
+.recipient-status-badge-group--stacked .recipient-status-timestamp::before {
+  content: none;
+  margin: 0;
 }
 
 .recipient-status-badge {
@@ -201,10 +223,42 @@
 }
 
 .recipient-list-actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
   gap: 0.35rem;
-  margin-top: 0.15rem;
+  white-space: nowrap;
+}
+
+.recipient-list-actions .btn {
+  flex-shrink: 0;
+}
+
+@media (max-width: 540px) {
+  .recipient-list-card {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .recipient-list-aside {
+    align-items: flex-start;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .recipient-status-badge-group--stacked {
+    align-items: flex-start;
+  }
+
+  .recipient-status-badge-group--stacked .recipient-status-timestamp {
+    text-align: left;
+  }
+
+  .recipient-list-actions {
+    justify-content: flex-start;
+    width: auto;
+  }
 }
 
 .recipient-pdf-preview {
@@ -471,6 +525,22 @@
 
 .stat-card-link:hover .stat-card {
   border-color: var(--color-primary);
+}
+
+.dashboard-stats-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .dashboard-page-grid {

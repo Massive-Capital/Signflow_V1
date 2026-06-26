@@ -34,9 +34,8 @@ const INNER_PAD = 12;
 const FIELD_GAP = 9;
 const COLUMN_TITLE_GAP = 8;
 const COLUMN_TITLE_HEIGHT = 12;
-const TIMESTAMP_ENTRY_HEIGHT = 28;
-
-const DETAIL_LABEL_WIDTH = 58;
+const TEXT_LINE_GAP = 3;
+const MEASURE_PAD = 2;
 
 const COL_COUNT = 3;
 const COL_GAP = 12;
@@ -256,6 +255,70 @@ function dataUrlToBytes(dataUrl: string): Uint8Array {
   return Uint8Array.from(Buffer.from(base64, 'base64'));
 }
 
+function lineHeightFor(size: number): number {
+  return size + TEXT_LINE_GAP;
+}
+
+function measureWrappedLineCount(font: PDFFont, text: string, size: number, maxWidth: number): number {
+  if (!text) return 1;
+  if (maxWidth <= 0) return 1;
+
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return 1;
+
+  let lines = 1;
+  let lineWidth = 0;
+  const spaceWidth = font.widthOfTextAtSize(' ', size);
+
+  for (const word of words) {
+    const wordWidth = font.widthOfTextAtSize(word, size);
+    if (wordWidth > maxWidth) {
+      if (lineWidth > 0) {
+        lines++;
+        lineWidth = 0;
+      }
+      lines += Math.max(0, Math.ceil(wordWidth / maxWidth) - 1);
+      lineWidth = wordWidth % maxWidth || wordWidth;
+      continue;
+    }
+
+    if (lineWidth === 0) {
+      lineWidth = wordWidth;
+      continue;
+    }
+
+    if (lineWidth + spaceWidth + wordWidth <= maxWidth) {
+      lineWidth += spaceWidth + wordWidth;
+    } else {
+      lines++;
+      lineWidth = wordWidth;
+    }
+  }
+
+  return lines;
+}
+
+function measureTextBlockHeight(font: PDFFont, text: string, size: number, maxWidth: number): number {
+  const lines = measureWrappedLineCount(font, text, size, maxWidth);
+  return lines * lineHeightFor(size) + MEASURE_PAD;
+}
+
+function measureDetailRowHeight(fonts: Fonts, value: string, width: number): number {
+  return LABEL_SIZE + 3 + measureTextBlockHeight(fonts.regular, value, BODY_SIZE, width) + 6;
+}
+
+function measureTimestampBlockHeight(
+  fonts: Fonts,
+  timestamp: string,
+  ip: string | undefined,
+  width: number,
+): number {
+  const ipText = `IP ${formatAuditIp(ip)}`;
+  const timestampHeight = measureTextBlockHeight(fonts.regular, timestamp, BODY_SIZE, width);
+  const ipHeight = measureTextBlockHeight(fonts.regular, ipText, CAPTION_SIZE, width);
+  return LABEL_SIZE + 3 + timestampHeight + 3 + ipHeight + 4;
+}
+
 function drawText(
   page: PDFPage,
   text: string,
@@ -273,7 +336,7 @@ function drawText(
     font,
     color,
     maxWidth: maxWidth ?? CONTENT_WIDTH,
-    lineHeight: size + 2,
+    lineHeight: lineHeightFor(size),
   });
 }
 
@@ -348,8 +411,8 @@ function drawStackedField(
   drawText(page, label.toUpperCase(), x, y, fonts.bold, LABEL_SIZE, MUTED_COLOR, width);
   const valueY = y - LABEL_SIZE - 4;
   drawText(page, value, x, valueY, fonts.regular, valueSize, TEXT_COLOR, width);
-  const lines = Math.max(1, Math.ceil(fonts.regular.widthOfTextAtSize(value, valueSize) / width));
-  return valueY - valueSize * lines - (lines > 1 ? 3 : 0) - FIELD_GAP;
+  const valueHeight = measureTextBlockHeight(fonts.regular, value, valueSize, width);
+  return valueY - valueHeight - FIELD_GAP;
 }
 
 function drawDetailRow(
@@ -361,18 +424,10 @@ function drawDetailRow(
   value: string,
   fonts: Fonts,
 ): number {
-  drawText(page, label, x, y, fonts.bold, LABEL_SIZE, MUTED_COLOR, DETAIL_LABEL_WIDTH);
-  drawText(
-    page,
-    value,
-    x + DETAIL_LABEL_WIDTH,
-    y,
-    fonts.regular,
-    BODY_SIZE,
-    TEXT_COLOR,
-    width - DETAIL_LABEL_WIDTH,
-  );
-  return y - BODY_SIZE - 6;
+  drawText(page, label, x, y, fonts.bold, LABEL_SIZE, MUTED_COLOR, width);
+  const valueY = y - LABEL_SIZE - 3;
+  drawText(page, value, x, valueY, fonts.regular, BODY_SIZE, TEXT_COLOR, width);
+  return valueY - measureTextBlockHeight(fonts.regular, value, BODY_SIZE, width) - 6;
 }
 
 function drawTimestampBlock(
@@ -385,21 +440,14 @@ function drawTimestampBlock(
   ip: string | undefined,
   fonts: Fonts,
 ): number {
-  drawText(page, label, x, y, fonts.bold, LABEL_SIZE, MUTED_COLOR, DETAIL_LABEL_WIDTH);
-  const valueX = x + DETAIL_LABEL_WIDTH;
-  const valueWidth = width - DETAIL_LABEL_WIDTH;
-  drawText(page, timestamp, valueX, y, fonts.regular, BODY_SIZE, TEXT_COLOR, valueWidth);
-  drawText(
-    page,
-    `IP ${formatAuditIp(ip)}`,
-    valueX,
-    y - BODY_SIZE - 3,
-    fonts.regular,
-    CAPTION_SIZE,
-    MUTED_COLOR,
-    valueWidth,
-  );
-  return y - TIMESTAMP_ENTRY_HEIGHT;
+  const ipText = `IP ${formatAuditIp(ip)}`;
+
+  drawText(page, label, x, y, fonts.bold, LABEL_SIZE, MUTED_COLOR, width);
+  let cursorY = y - LABEL_SIZE - 3;
+  drawText(page, timestamp, x, cursorY, fonts.regular, BODY_SIZE, TEXT_COLOR, width);
+  cursorY -= measureTextBlockHeight(fonts.regular, timestamp, BODY_SIZE, width) + 3;
+  drawText(page, ipText, x, cursorY, fonts.regular, CAPTION_SIZE, MUTED_COLOR, width);
+  return cursorY - measureTextBlockHeight(fonts.regular, ipText, CAPTION_SIZE, width) - 4;
 }
 
 function drawStatusPill(page: PDFPage, x: number, y: number, status: string, fonts: Fonts): void {
@@ -452,6 +500,21 @@ function drawBrandStrip(
   const brandLabel = continued ? 'SignFlow · Certificate (continued)' : 'SignFlow';
   drawText(page, brandLabel, MARGIN_X + 12, stripTop - 17, fonts.bold, BODY_SIZE, PRIMARY_DARK);
 
+  if (pageNumber > 1) {
+    const pageLabel = `Page ${pageNumber}`;
+    const pageWidth = fonts.regular.widthOfTextAtSize(pageLabel, CAPTION_SIZE);
+    drawText(
+      page,
+      pageLabel,
+      MARGIN_X + CONTENT_WIDTH - pageWidth - 12,
+      stripTop - 17,
+      fonts.regular,
+      CAPTION_SIZE,
+      MUTED_COLOR,
+    );
+    return;
+  }
+
   const generatedLabel = `Generated ${formatCertificateTimestamp(generatedAt)}`;
   const generatedWidth = fonts.regular.widthOfTextAtSize(generatedLabel, CAPTION_SIZE);
   drawText(
@@ -463,20 +526,6 @@ function drawBrandStrip(
     CAPTION_SIZE,
     MUTED_COLOR,
   );
-
-  if (pageNumber > 1) {
-    const pageLabel = `Page ${pageNumber}`;
-    const pageWidth = fonts.regular.widthOfTextAtSize(pageLabel, CAPTION_SIZE);
-    drawText(
-      page,
-      pageLabel,
-      MARGIN_X + (CONTENT_WIDTH - pageWidth) / 2,
-      stripTop - 17,
-      fonts.regular,
-      CAPTION_SIZE,
-      MUTED_COLOR,
-    );
-  }
 }
 
 function drawPageFooter(page: PDFPage, fonts: Fonts): void {
@@ -575,8 +624,8 @@ function measureMetadataColumnHeight(
       continue;
     }
     const valueSize = entry.small ? BODY_SIZE - 0.5 : BODY_SIZE;
-    const lines = Math.max(1, Math.ceil(fonts.regular.widthOfTextAtSize(entry.value, valueSize) / width));
-    height += LABEL_SIZE + 4 + valueSize * lines + (lines > 1 ? 3 : 0) + FIELD_GAP;
+    const valueHeight = measureTextBlockHeight(fonts.regular, entry.value, valueSize, width);
+    height += LABEL_SIZE + 4 + valueHeight + FIELD_GAP;
   }
   return height + INNER_PAD;
 }
@@ -599,7 +648,6 @@ async function drawMetadataGrid(
   drawColumnDividers(next.page, boxTop - INNER_PAD, boxBottom + INNER_PAD);
 
   const startY = boxTop - INNER_PAD;
-  const columnEndYs: number[] = [];
 
   for (let col = 0; col < COL_COUNT; col++) {
     let fieldY = startY;
@@ -617,10 +665,9 @@ async function drawMetadataGrid(
         small: entry.small,
       });
     }
-    columnEndYs.push(fieldY);
   }
 
-  next.y = Math.min(...columnEndYs) - SECTION_GAP;
+  next.y = boxBottom - SECTION_GAP;
   return next;
 }
 
@@ -633,8 +680,16 @@ async function drawTableSection(
   generatedAt: Date,
 ): Promise<PageCursor> {
   const headerHeight = 22;
-  const rowHeight = 24;
-  const totalHeight = headerHeight + rows.length * rowHeight + SECTION_GAP;
+  const rowHeights = rows.map((row) => {
+    let maxHeight = BODY_SIZE + 14;
+    for (let i = 0; i < row.cells.length && i < COL_COUNT; i++) {
+      const font = i === 0 && row.boldFirst ? fonts.bold : fonts.regular;
+      const cellHeight = measureTextBlockHeight(font, row.cells[i], BODY_SIZE, COL_INNER_WIDTH);
+      maxHeight = Math.max(maxHeight, cellHeight + 14);
+    }
+    return maxHeight;
+  });
+  const totalHeight = headerHeight + rowHeights.reduce((sum, height) => sum + height, 0) + SECTION_GAP;
   let next = ensureSpace(pdfDoc, cursor, totalHeight, fonts, generatedAt);
 
   const boxTop = next.y;
@@ -668,7 +723,8 @@ async function drawTableSection(
   }
 
   let rowTop = headerBottom;
-  for (const row of rows) {
+  for (const [rowIndex, row] of rows.entries()) {
+    const rowHeight = rowHeights[rowIndex] ?? 24;
     rowTop -= rowHeight;
     if (row.highlight) {
       next.page.drawRectangle({
@@ -681,7 +737,7 @@ async function drawTableSection(
       });
     }
 
-    const baseline = rowTop + rowHeight / 2 - BODY_SIZE * 0.35;
+    const textBaseline = rowTop + rowHeight - 10 - BODY_SIZE;
     for (let i = 0; i < row.cells.length && i < COL_COUNT; i++) {
       const font = i === 0 && row.boldFirst ? fonts.bold : fonts.regular;
       const color = i === 1 && row.mutedMiddle ? MUTED_COLOR : TEXT_COLOR;
@@ -689,7 +745,7 @@ async function drawTableSection(
         next.page,
         row.cells[i],
         colInnerX(i),
-        baseline,
+        textBaseline,
         font,
         BODY_SIZE,
         color,
@@ -802,6 +858,58 @@ async function drawSignatureBox(
   drawText(page, `ID ${signatureId}`, x + INNER_PAD, bottomY + 5, fonts.regular, CAPTION_SIZE, MUTED_COLOR, width - INNER_PAD * 2);
 }
 
+function measureSignerCol0Height(
+  recipient: RecipientRow,
+  fonts: Fonts,
+  width: number,
+  signerIndex: number,
+  signerTotal: number,
+): number {
+  const signerLabel = `Signer ${signerIndex} of ${signerTotal}`;
+  let height = measureTextBlockHeight(fonts.bold, signerLabel, LABEL_SIZE, width) + 5;
+  height += measureTextBlockHeight(fonts.bold, recipient.name, BODY_SIZE + 0.5, width) + 6;
+  height += measureTextBlockHeight(fonts.regular, recipient.email, BODY_SIZE, width) + 10;
+
+  const details = [
+    formatRecipientRole(recipient.role),
+    formatProfileType(recipient.profile_type),
+    'Email',
+    'Accepted',
+  ];
+  for (const value of details) {
+    height += measureDetailRowHeight(fonts, value, width);
+  }
+
+  return height;
+}
+
+function measureSignerCol2Height(
+  info: RecipientSigningInfo | undefined,
+  fonts: Fonts,
+  width: number,
+): number {
+  const entries = [
+    { at: info?.sentAt, ip: info?.sentIp },
+    { at: info?.viewedAt, ip: info?.viewedIp },
+    { at: info?.signedAt, ip: info?.signedIp },
+  ];
+
+  return entries.reduce(
+    (total, entry) =>
+      total + measureTimestampBlockHeight(fonts, formatCertificateTimestamp(entry.at), entry.ip, width),
+    0,
+  );
+}
+
+function measureSenderCol0Height(sender: NonNullable<AuditPageInput['sender']>, fonts: Fonts, width: number): number {
+  const lines = [
+    sender.name,
+    sender.email,
+    sender.organizationName ?? '—',
+  ];
+  return lines.reduce((total, value) => total + measureDetailRowHeight(fonts, value, width), 0);
+}
+
 async function drawParticipantCard(
   pdfDoc: PDFDocument,
   cursor: PageCursor,
@@ -811,6 +919,7 @@ async function drawParticipantCard(
     columnTitles: [string, string, string];
     alternate?: boolean;
     signatureBoxHeight?: number;
+    contentHeight?: number;
     drawCol0: (page: PDFPage, x: number, y: number, width: number) => number;
     drawCol1?: (
       pdfDoc: PDFDocument,
@@ -823,11 +932,9 @@ async function drawParticipantCard(
     drawCol2: (page: PDFPage, x: number, y: number, width: number) => number;
   },
 ): Promise<PageCursor> {
-  const signatureBoxHeight = options.signatureBoxHeight ?? 80;
-  const col0Height = 130;
-  const col2Height = TIMESTAMP_ENTRY_HEIGHT * 3 + 8;
-  const contentHeight = Math.max(col0Height, signatureBoxHeight + 8, col2Height);
+  const contentHeight = options.contentHeight ?? 130;
   const cardHeight = INNER_PAD * 2 + COLUMN_TITLE_HEIGHT + COLUMN_TITLE_GAP + contentHeight + SECTION_GAP;
+  const signatureBoxHeight = options.signatureBoxHeight ?? Math.max(80, contentHeight - 24);
 
   let next = ensureSpace(pdfDoc, cursor, cardHeight, fonts, generatedAt);
 
@@ -846,7 +953,7 @@ async function drawParticipantCard(
     drawColumnTitle(next.page, i, titleY, options.columnTitles[i], fonts);
   }
 
-  const col0Bottom = options.drawCol0(next.page, colInnerX(0), dataStartY, COL_INNER_WIDTH);
+  options.drawCol0(next.page, colInnerX(0), dataStartY, COL_INNER_WIDTH);
 
   if (options.drawCol1) {
     await options.drawCol1(
@@ -860,8 +967,6 @@ async function drawParticipantCard(
   }
 
   options.drawCol2(next.page, colInnerX(2), dataStartY, COL_INNER_WIDTH);
-
-  void col0Bottom;
 
   next.y = boxBottom - SECTION_GAP;
   return next;
@@ -879,27 +984,22 @@ async function drawSignerEventRow(
   signerTotal: number,
 ): Promise<PageCursor> {
   const signatureId = formatSignatureId(recipient.id, info?.signedAt);
+  const col0Height = measureSignerCol0Height(recipient, fonts, COL_INNER_WIDTH, signerIndex, signerTotal);
+  const col2Height = measureSignerCol2Height(info, fonts, COL_INNER_WIDTH);
 
   return drawParticipantCard(pdfDoc, cursor, fonts, generatedAt, {
     columnTitles: ['Signer', 'Signature', 'Timestamps'],
     alternate: signerIndex % 2 === 1,
+    contentHeight: Math.max(col0Height, 88, col2Height),
     drawCol0: (page, x, y, width) => {
       let currentY = y;
-      drawText(
-        page,
-        `Signer ${signerIndex} of ${signerTotal}`,
-        x,
-        currentY,
-        fonts.bold,
-        LABEL_SIZE,
-        PRIMARY,
-        width,
-      );
-      currentY -= LABEL_SIZE + 5;
+      const signerLabel = `Signer ${signerIndex} of ${signerTotal}`;
+      drawText(page, signerLabel, x, currentY, fonts.bold, LABEL_SIZE, PRIMARY, width);
+      currentY -= measureTextBlockHeight(fonts.bold, signerLabel, LABEL_SIZE, width) + 5;
       drawText(page, recipient.name, x, currentY, fonts.bold, BODY_SIZE + 0.5, TEXT_COLOR, width);
-      currentY -= BODY_SIZE + 6;
+      currentY -= measureTextBlockHeight(fonts.bold, recipient.name, BODY_SIZE + 0.5, width) + 6;
       drawText(page, recipient.email, x, currentY, fonts.regular, BODY_SIZE, MUTED_COLOR, width);
-      currentY -= BODY_SIZE + 10;
+      currentY -= measureTextBlockHeight(fonts.regular, recipient.email, BODY_SIZE, width) + 10;
 
       const details = [
         { label: 'Role', value: formatRecipientRole(recipient.role) },
@@ -948,8 +1048,17 @@ async function drawSenderCard(
   fonts: Fonts,
   generatedAt: Date,
 ): Promise<PageCursor> {
+  const col0Height = measureSenderCol0Height(sender, fonts, COL_INNER_WIDTH);
+  const col2Height = measureTimestampBlockHeight(
+    fonts,
+    formatCertificateTimestamp(sender.sentAt),
+    sender.sentIp,
+    COL_INNER_WIDTH,
+  );
+
   return drawParticipantCard(pdfDoc, cursor, fonts, generatedAt, {
     columnTitles: ['Sender', 'Delivery', 'Timestamps'],
+    contentHeight: Math.max(col0Height, 88, col2Height),
     drawCol0: (page, x, y, width) => {
       let currentY = y;
       const lines = [

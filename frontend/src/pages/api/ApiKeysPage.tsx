@@ -5,6 +5,7 @@ import { LoadingState } from '../../components/common/LoadingState'
 import { Button } from '../../components/ui/Button'
 import { ApiKeysTable, CreateApiKeyModal, CreatedApiKeyModal } from '../../components/api/ApiKeysPanel'
 import { useApiKeys, useCreateApiKey } from '../../hooks/useApiKeys'
+import { toast } from '../../utils/toast'
 
 export function ApiKeysPage() {
   const [showCreate, setShowCreate] = useState(false)
@@ -23,6 +24,7 @@ export function ApiKeysPage() {
           setShowCreate(false)
           setName('')
           setCreatedKey(key.key)
+          toast.success('API key created.')
         },
       },
     )

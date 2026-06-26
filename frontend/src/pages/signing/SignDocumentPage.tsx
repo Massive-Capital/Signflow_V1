@@ -14,7 +14,6 @@ export function SignDocumentPage() {
   const {
     needsProfileStep,
     isSavingProfile,
-    profileError,
     initialProfileType,
     confirmProfile,
   } = useSigningProfileGate(token, data?.document, data?.recipientId)
@@ -46,7 +45,6 @@ export function SignDocumentPage() {
           isSaving={isSavingProfile}
           onConfirm={confirmProfile}
         />
-        {profileError && <p className="signing-profile-step-error">{profileError}</p>}
       </>
     )
   }

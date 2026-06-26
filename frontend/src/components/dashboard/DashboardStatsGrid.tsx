@@ -25,7 +25,7 @@ export function DashboardStatsGrid({ stats }: DashboardStatsGridProps) {
   ]
 
   return (
-    <div className="stats-grid">
+    <div className="stats-grid dashboard-stats-grid">
       {items.map((item) => {
         const card = (
           <StatCard

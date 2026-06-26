@@ -19,6 +19,7 @@ import {
   revokePdfPreviewObjectUrl,
   showBlobInPreviewTab,
 } from '../../utils/pdf'
+import { toast } from '../../utils/toast'
 import type { Document } from '../../types'
 
 interface DocumentDetailProps {
@@ -30,7 +31,6 @@ interface DocumentDetailProps {
 export function DocumentDetail({ document, onOpenBuilder, onSend }: DocumentDetailProps) {
   const [downloading, setDownloading] = useState(false)
   const [previewing, setPreviewing] = useState(false)
-  const [actionError, setActionError] = useState<string | null>(null)
   const [inlinePreview, setInlinePreview] = useState<{ title: string; url: string } | null>(null)
 
   const isCompleted = document.status === 'completed'
@@ -71,7 +71,6 @@ export function DocumentDetail({ document, onOpenBuilder, onSend }: DocumentDeta
     const useInlinePreview = !previewTab
 
     setPreviewing(true)
-    setActionError(null)
 
     try {
       const blob = await api.documents.previewSigned(document.id)
@@ -105,7 +104,7 @@ export function DocumentDetail({ document, onOpenBuilder, onSend }: DocumentDeta
       }
     } catch (error) {
       previewTab?.close()
-      setActionError(
+      toast.error(
         error instanceof Error
           ? error.message
           : 'Unable to preview the signed document. Please try again.',
@@ -119,12 +118,12 @@ export function DocumentDetail({ document, onOpenBuilder, onSend }: DocumentDeta
     if (!canAccessSignedPdf) return
 
     setDownloading(true)
-    setActionError(null)
 
     try {
       await api.documents.downloadSigned(document.id, document.title)
+      toast.success('Signed PDF downloaded.')
     } catch (error) {
-      setActionError(
+      toast.error(
         error instanceof Error
           ? error.message
           : 'Unable to download the signed document. Please try again.',
@@ -246,8 +245,6 @@ export function DocumentDetail({ document, onOpenBuilder, onSend }: DocumentDeta
           </div>
         )}
       </div>
-
-      {actionError && <p className="document-download-error">{actionError}</p>}
 
       <div className="form-row">
         <Card title={`Recipients (${document.recipients.length})`}>

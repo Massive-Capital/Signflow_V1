@@ -51,7 +51,6 @@ export function SendWorkflowPage() {
           message={workflow.message}
           attachments={workflow.attachments}
           uploadingAttachments={workflow.uploadingAttachments}
-          attachmentError={workflow.attachmentError}
           sending={workflow.sending}
           onWorkflowTypeChange={workflow.setWorkflowType}
           onSigningOrderChange={workflow.setSigningOrder}

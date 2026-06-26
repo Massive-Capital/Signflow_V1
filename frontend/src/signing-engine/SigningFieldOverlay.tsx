@@ -96,21 +96,9 @@ export function SigningFieldOverlay({
           height: `${field.height}%`,
           borderColor,
         }}
-        aria-label={field.label}
-      >
-        {isSignatureField(field.type) && isFilled ? (
-          <SignatureFieldContent
-            field={field}
-            value={value!}
-            signedAt={signedAt}
-            imageSrc={imageSrc}
-          />
-        ) : imageSrc ? (
-          <img src={imageSrc} alt={field.label} className="signing-field-image" />
-        ) : isFilled ? (
-          <span className="signing-field-text">{formatFieldDisplayValue(value!)}</span>
-        ) : null}
-      </div>
+        aria-label={isFilled ? `${field.label} (completed)` : field.label}
+        title={isFilled ? `${field.label} — already completed on the document` : undefined}
+      />
     )
   }
 

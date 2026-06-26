@@ -44,9 +44,6 @@ export function CreateDocumentPage() {
       { title: title.trim(), file },
       {
         onSuccess: (doc) => navigate(`/documents/${doc.id}/builder`),
-        onError: (error) => {
-          setFileError(error instanceof Error ? error.message : 'Failed to upload document')
-        },
       },
     )
   }

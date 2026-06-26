@@ -8,6 +8,7 @@ import {
   shouldChooseSigningProfile,
 } from '../utils/signingProfile'
 import type { Document, ProfileType } from '../types'
+import { toast } from '../utils/toast'
 
 export function useSigningProfileGate(
   token: string | undefined,
@@ -16,7 +17,6 @@ export function useSigningProfileGate(
 ) {
   const queryClient = useQueryClient()
   const [isSavingProfile, setIsSavingProfile] = useState(false)
-  const [profileError, setProfileError] = useState<string | null>(null)
   const [profileConfirmed, setProfileConfirmed] = useState(() =>
     token ? isSigningProfileConfirmed(token) : false,
   )
@@ -30,7 +30,6 @@ export function useSigningProfileGate(
     if (!token) return
 
     setIsSavingProfile(true)
-    setProfileError(null)
 
     try {
       await api.signing.setProfile(token, profileType)
@@ -38,7 +37,7 @@ export function useSigningProfileGate(
       setProfileConfirmed(true)
       await queryClient.invalidateQueries({ queryKey: ['signing-session', token] })
     } catch {
-      setProfileError('Unable to save your profile selection. Please try again.')
+      toast.error('Unable to save your profile selection. Please try again.')
     } finally {
       setIsSavingProfile(false)
     }
@@ -51,7 +50,6 @@ export function useSigningProfileGate(
   return {
     needsProfileStep,
     isSavingProfile,
-    profileError,
     initialProfileType,
     confirmProfile,
   }

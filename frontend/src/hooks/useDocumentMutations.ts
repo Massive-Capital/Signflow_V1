@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { getPdfPageCount } from '../utils/pdf'
+import { getErrorMessage, toast } from '../utils/toast'
 import type { Document } from '../types'
 
 interface CreateDocumentInput {
@@ -24,10 +25,11 @@ export function useUpdateDocument(documentId: string) {
       }
       return { previous }
     },
-    onError: (_error, _data, context) => {
+    onError: (error, _data, context) => {
       if (context?.previous) {
         queryClient.setQueryData(['document', documentId], context.previous)
       }
+      toast.error(getErrorMessage(error, 'Unable to save document changes.'))
     },
     onSuccess: (updatedDocument) => {
       queryClient.setQueryData(['document', documentId], updatedDocument)
@@ -45,6 +47,9 @@ export function useCreateDocument() {
       return api.documents.createWithFile(title, file, pages)
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['documents'] }),
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Unable to create document.'))
+    },
   })
 }
 
@@ -57,6 +62,9 @@ export function useUploadDocumentFile(documentId: string) {
       queryClient.setQueryData(['document', documentId], updatedDocument)
       queryClient.invalidateQueries({ queryKey: ['documents'] })
     },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Unable to upload document file.'))
+    },
   })
 }
 
@@ -68,6 +76,10 @@ export function useDeleteDocument() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+      toast.success('Document deleted.')
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, 'Unable to delete document.'))
     },
   })
 }
