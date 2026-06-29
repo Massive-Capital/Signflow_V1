@@ -7,7 +7,7 @@ import { AppError } from '../utils/app-error';
 import { assertDocumentContentIntegrity } from '../utils/document-integrity';
 import { appendDocumentAuditPage } from '../utils/pdf-audit-page';
 import { stampDocumentIdOnAllPages } from '../utils/pdf-page-footer';
-import { formatSigningTimestamp } from '../utils/signing-timestamp';
+import { formatSigningDateValue, formatSigningTimestamp } from '../utils/signing-timestamp';
 import { documentFileService } from './document-file.service';
 import { filterFieldsForRecipientProfile } from '../utils/profile-field';
 import type { ProfileType } from '../types/domain';
@@ -152,8 +152,10 @@ async function drawFieldValue(
   const text = parsed.text?.trim();
   if (!text) return;
 
+  const displayText = field.type === 'date' ? formatSigningDateValue(text) : text;
+
   if (field.type === 'checkbox') {
-    if (text !== 'true') return;
+    if (displayText !== 'true') return;
     const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontSize = Math.max(10, Math.min(rect.height * 0.7, 16));
     page.drawText('X', {
@@ -202,11 +204,11 @@ async function drawFieldValue(
         Math.min(rect.height * SIGNATURE_TEXT_HEIGHT_RATIO, SIGNATURE_TEXT_MAX_FONT_SIZE),
       )
     : Math.max(9, Math.min(rect.height * 0.68, 22));
-  const textWidth = font.widthOfTextAtSize(text, fontSize);
+  const textWidth = font.widthOfTextAtSize(displayText, fontSize);
   const scale = textWidth > availableTextWidth ? availableTextWidth / textWidth : 1;
   const drawSize = fontSize * scale;
 
-  page.drawText(text, {
+  page.drawText(displayText, {
     x: rect.x,
     y: rect.y + Math.max(0, (rect.height - drawSize) / 2),
     size: drawSize,

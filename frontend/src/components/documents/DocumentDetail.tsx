@@ -258,7 +258,11 @@ export function DocumentDetail({ document, onOpenBuilder, onSend }: DocumentDeta
           />
         </Card>
         <Card title={`${isCompleted ? 'Signed Fields' : 'Fields'} (${document.fields.length})`}>
-          <FieldList fields={document.fields} recipients={document.recipients} />
+          <FieldList
+            fields={document.fields}
+            recipients={document.recipients}
+            showValues={isSentOrBeyond}
+          />
         </Card>
       </div>
     </>

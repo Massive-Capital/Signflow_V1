@@ -1,4 +1,6 @@
 import { API_BASE_URL } from '../config/env'
+import { formatDateFieldValue } from './date'
+import { getMachineIpHeaders } from './machineIp'
 import { useAuthStore } from '../stores/authStore'
 import { getEmbedApiKey, isEmbedPortalRoute, readEmbedApiKeyFromSearch } from '../api/embedAuth'
 import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist'
@@ -78,6 +80,8 @@ export async function fetchPdfArrayBuffer(fileUrl: string): Promise<ArrayBuffer>
       throw new Error('You do not have access to this document file.')
     }
   }
+
+  Object.assign(headers, await getMachineIpHeaders())
 
   const response = await fetch(url, { headers, credentials: 'omit' })
   if (!response.ok) {
@@ -214,7 +218,7 @@ export function formatFieldDisplayValue(value: string): string {
   if (value.startsWith('typed:')) return value.slice('typed:'.length)
   if (value.startsWith('uploaded:')) return value.slice('uploaded:'.length)
   if (value.startsWith('drawn:')) return 'Signed'
-  return value
+  return formatDateFieldValue(value)
 }
 
 export function getSignatureImageSrc(value: string): string | null {
@@ -239,7 +243,10 @@ export async function downloadDocumentCopy(
 
 export async function downloadSignedDocumentCopy(token: string, title: string): Promise<void> {
   const apiOrigin = API_BASE_URL.replace(/\/api\/v1\/?$/, '')
-  const response = await fetch(`${apiOrigin}/api/v1/signing/sessions/${token}/download`)
+  const machineIpHeaders = await getMachineIpHeaders()
+  const response = await fetch(`${apiOrigin}/api/v1/signing/sessions/${token}/download`, {
+    headers: machineIpHeaders,
+  })
 
   if (!response.ok) {
     throw new Error('Failed to download signed document')

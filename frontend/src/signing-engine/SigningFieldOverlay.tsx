@@ -22,8 +22,6 @@ function getInputType(type: FieldType): string {
       return 'email'
     case 'phone':
       return 'tel'
-    case 'date':
-      return 'date'
     default:
       return 'text'
   }
@@ -196,6 +194,32 @@ export function SigningFieldOverlay({
   }
 
   const inputValue = value ? formatFieldDisplayValue(value) : ''
+
+  if (field.type === 'date') {
+    return (
+      <div
+        className={`signing-field signing-field--input signing-field--date ${isActive ? 'active' : ''} ${isFilled ? 'filled' : ''}`}
+        style={{
+          left: `${field.x}%`,
+          top: `${field.y}%`,
+          width: `${field.width}%`,
+          height: `${field.height}%`,
+          borderColor,
+        }}
+        onClick={onActivate}
+      >
+        <input
+          type="text"
+          className="signing-field-input"
+          value={inputValue}
+          placeholder={field.label}
+          onChange={(event) => onValueChange(event.target.value)}
+          onFocus={onActivate}
+          aria-label={field.label}
+        />
+      </div>
+    )
+  }
 
   return (
     <div

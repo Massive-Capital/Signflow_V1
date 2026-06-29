@@ -7,6 +7,7 @@ import { KeyRound } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { api } from '../../api/client'
+import { toast } from '../../utils/toast'
 
 const schema = z
   .object({
@@ -51,9 +52,12 @@ export function ResetPasswordForm() {
     try {
       await api.auth.resetPassword(token, data.password)
       setSuccess(true)
+      toast.success('Password updated. Redirecting to sign in...')
       setTimeout(() => navigate('/login'), 2000)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reset password. Please try again.')
+      const message = err instanceof Error ? err.message : 'Failed to reset password. Please try again.'
+      setError(message)
+      toast.error(message)
     }
   }
 

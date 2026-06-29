@@ -9,6 +9,7 @@ import { AuthFooter } from '../layouts/AuthLayout'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { api } from '../../api/client'
+import { toast } from '../../utils/toast'
 
 const registerSchema = z
   .object({
@@ -34,8 +35,15 @@ export function RegisterForm() {
   } = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) })
 
   const onSubmit = async (data: RegisterFormData) => {
-    await api.auth.register(data.email, data.name, data.password)
-    setSuccess(true)
+    try {
+      await api.auth.register(data.email, data.name, data.password)
+      setSuccess(true)
+      toast.success('Account created. Please verify your email to continue.')
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Unable to create account. Please try again.',
+      )
+    }
   }
 
   return (

@@ -5,7 +5,7 @@ import { documentService } from './document.service';
 import { pdfDocumentService } from './pdf-document.service';
 import { documentFileService } from './document-file.service';
 import { AppError } from '../utils/app-error';
-import { assertDocumentContentIntegrity } from '../utils/document-integrity';
+import { assertOrResyncDocumentContentIntegrity } from '../utils/document-integrity';
 import { hashToken } from '../utils/crypto';
 import { formatSigningDate } from '../utils/signing-timestamp';
 import { toDocument } from '../utils/mappers';
@@ -38,7 +38,7 @@ export class SigningService {
 
     const recipients = await documentRepository.findRecipients(session.document_id);
     const fields = await documentRepository.findFields(session.document_id);
-    assertDocumentContentIntegrity(row, recipients, fields);
+    await assertOrResyncDocumentContentIntegrity(row, recipients, fields);
 
     const baseDocument = toDocument(row, recipients, fields);
     const signingInfo = await signingRepository.getRecipientSigningInfo(session.document_id);
@@ -88,7 +88,7 @@ export class SigningService {
 
     const recipients = await documentRepository.findRecipients(session.document_id);
     const fields = await documentRepository.findFields(session.document_id);
-    assertDocumentContentIntegrity(row, recipients, fields);
+    await assertOrResyncDocumentContentIntegrity(row, recipients, fields);
 
     if (session.investor_recipient_id) {
       const buffer = await pdfDocumentService.generateRecipientSignedPdf(

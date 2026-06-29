@@ -55,5 +55,8 @@ export const env = {
   logLevel: process.env.LOG_LEVEL ?? 'info',
   applicationLogDbEnabled: parseBoolean(process.env.APPLICATION_LOG_DB_ENABLED, true),
   applicationLogDbLevel: process.env.APPLICATION_LOG_DB_LEVEL ?? 'info',
+  applicationLogFileEnabled: parseBoolean(process.env.APPLICATION_LOG_FILE_ENABLED, true),
+  applicationLogFileLevel: process.env.APPLICATION_LOG_FILE_LEVEL ?? 'info',
+  logDir: process.env.LOG_DIR ?? 'logs',
   logSkipPaths: parseCsv(process.env.LOG_SKIP_PATHS ?? '/health,/api/v1/health'),
 } as const;

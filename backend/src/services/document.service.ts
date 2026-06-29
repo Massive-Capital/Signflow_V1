@@ -617,6 +617,32 @@ export class DocumentService {
       }
     }
 
+    const contentWasPatched =
+      input.recipients !== undefined ||
+      input.fields !== undefined ||
+      input.workflowType !== undefined ||
+      input.pages !== undefined ||
+      input.emailSubject !== undefined ||
+      input.emailMessage !== undefined;
+
+    if (contentWasPatched && input.status !== 'sent') {
+      const finalRow = await documentRepository.findById(id);
+      if (finalRow && ['sent', 'pending'].includes(finalRow.status)) {
+        const latestRecipients = await documentRepository.findRecipients(id);
+        const latestFields = await documentRepository.findFields(id);
+        const sentContentHash = computeDocumentContentHash({
+          fileHash: finalRow.file_hash,
+          pages: finalRow.pages,
+          workflowType: finalRow.workflow_type,
+          emailSubject: finalRow.email_subject,
+          emailMessage: finalRow.email_message,
+          recipients: latestRecipients,
+          fields: latestFields,
+        });
+        await documentRepository.update(id, { sentContentHash });
+      }
+    }
+
     return this.getFullDocument(id);
   }
 

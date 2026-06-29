@@ -10,6 +10,7 @@ import './components/layouts/layouts.css'
 import './pages/documents/builder.css'
 import './signing-engine/signing.css'
 import './pages/pages.css'
+import { prefetchMachineIp } from './utils/machineIp'
 import App from './App.tsx'
 
 const queryClient = new QueryClient({
@@ -22,6 +23,7 @@ const queryClient = new QueryClient({
 })
 
 applyTheme(useThemeStore.getState().mode)
+prefetchMachineIp()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

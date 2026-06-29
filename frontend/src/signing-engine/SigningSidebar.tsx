@@ -57,10 +57,10 @@ export function SigningSidebar({
 
       <div className="sidebar-nav-buttons">
         <Button variant="secondary" size="sm" icon={ChevronLeft} onClick={onPrevious} disabled={currentFieldIndex === 0}>
-          Previous Field
+          Previous field
         </Button>
         <Button variant="secondary" size="sm" iconRight={ChevronRight} onClick={onNext} disabled={currentFieldIndex >= requiredFields.length - 1}>
-          Next Required Field
+          Next required field
         </Button>
       </div>
 

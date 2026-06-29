@@ -865,11 +865,11 @@ a.btn {
 /* Toasts */
 .toast-viewport {
   position: fixed;
-  top: 1rem;
   right: 1rem;
+  bottom: 1rem;
   z-index: 10000;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 0.5rem;
   width: min(22rem, calc(100vw - 2rem));
   pointer-events: none;
@@ -882,10 +882,8 @@ a.btn {
   padding: 0.75rem 0.85rem;
   border-radius: var(--radius);
   border: 1px solid var(--color-border-strong);
-  background: var(--glass-bg-strong);
+  background: var(--modal-bg);
   box-shadow: var(--shadow-md);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   pointer-events: auto;
   animation: toast-enter 0.22s ease-out;
 }
@@ -937,7 +935,8 @@ a.btn {
 }
 
 .toast-success {
-  border-color: rgba(22, 163, 74, 0.25);
+  background: color-mix(in srgb, var(--color-success) 14%, var(--modal-bg));
+  border-color: color-mix(in srgb, var(--color-success) 28%, transparent);
 }
 
 .toast-success .toast-icon {
@@ -945,7 +944,8 @@ a.btn {
 }
 
 .toast-error {
-  border-color: rgba(239, 68, 68, 0.28);
+  background: color-mix(in srgb, var(--color-danger) 14%, var(--modal-bg));
+  border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
 }
 
 .toast-error .toast-icon {
@@ -953,6 +953,7 @@ a.btn {
 }
 
 .toast-info {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--modal-bg));
   border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
@@ -961,7 +962,8 @@ a.btn {
 }
 
 .toast-warning {
-  border-color: rgba(245, 158, 11, 0.3);
+  background: color-mix(in srgb, var(--color-warning) 16%, var(--modal-bg));
+  border-color: color-mix(in srgb, var(--color-warning) 32%, transparent);
 }
 
 .toast-warning .toast-icon {
@@ -970,8 +972,9 @@ a.btn {
 
 @media (max-width: 540px) {
   .toast-viewport {
-    left: 1rem;
     right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
     width: auto;
   }
 }

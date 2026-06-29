@@ -83,18 +83,32 @@ export class SigningRepository {
   }
 
   async markViewed(tokenHash: string, viewedIp?: string): Promise<void> {
+    if (viewedIp) {
+      await pool.query(
+        `UPDATE signing_sessions
+         SET viewed_at = COALESCE(viewed_at, NOW()),
+             viewed_ip = COALESCE(viewed_ip, $2)
+         WHERE token_hash = $1`,
+        [tokenHash, viewedIp],
+      );
+      return;
+    }
+
     await pool.query(
       `UPDATE signing_sessions
-       SET viewed_at = NOW(), viewed_ip = COALESCE(viewed_ip, $2)
+       SET viewed_at = NOW()
        WHERE token_hash = $1 AND viewed_at IS NULL`,
-      [tokenHash, viewedIp ?? null],
+      [tokenHash],
     );
   }
 
   async markCompleted(tokenHash: string, signedIp?: string): Promise<SigningSessionRow | null> {
     const result = await pool.query<SigningSessionRow>(
       `UPDATE signing_sessions
-       SET completed_at = NOW(), signed_ip = COALESCE(signed_ip, $2)
+       SET completed_at = NOW(),
+           signed_ip = COALESCE(signed_ip, $2),
+           viewed_at = COALESCE(viewed_at, NOW()),
+           viewed_ip = COALESCE(viewed_ip, $2)
        WHERE token_hash = $1
        RETURNING *`,
       [tokenHash, signedIp ?? null],

@@ -15,7 +15,10 @@ export function useCreateApiKey() {
   return useMutation({
     mutationFn: ({ name, environment }: { name: string; environment: 'production' | 'sandbox' }) =>
       api.apiKeys.create(name, environment),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['api-keys'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['api-keys'] })
+      toast.success('API key created.')
+    },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Unable to create API key.'))
     },

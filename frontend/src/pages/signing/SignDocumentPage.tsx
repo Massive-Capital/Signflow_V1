@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../api/client'
+import { prefetchMachineIp } from '../../utils/machineIp'
 import { PageTitle } from '../../components/common/PageTitle'
 import { SigningProfileStep } from '../../components/signing/SigningProfileStep'
 import { SigningEngine } from '../../signing-engine/SigningEngine'
@@ -10,6 +12,7 @@ import { useSigningSession } from '../../hooks/useSigningSession'
 
 export function SignDocumentPage() {
   const { token } = useParams<{ token: string }>()
+  const queryClient = useQueryClient()
   const { data, isLoading, error } = useSigningSession(token)
   const {
     needsProfileStep,
@@ -20,6 +23,7 @@ export function SignDocumentPage() {
 
   useEffect(() => {
     document.body.classList.add('signing-portal')
+    prefetchMachineIp()
     return () => document.body.classList.remove('signing-portal')
   }, [])
 
@@ -58,7 +62,10 @@ export function SignDocumentPage() {
         investorRecipientId={data.investorRecipientId}
         mode="public"
         token={token}
-        onComplete={(fieldValues) => api.signing.complete(token!, fieldValues)}
+        onComplete={async (fieldValues) => {
+          await api.signing.complete(token!, fieldValues)
+          await queryClient.invalidateQueries({ queryKey: ['signing-session', token] })
+        }}
       />
     </>
   )

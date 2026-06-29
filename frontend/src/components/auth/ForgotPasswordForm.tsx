@@ -7,6 +7,7 @@ import { Mail } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { api } from '../../api/client'
+import { toast } from '../../utils/toast'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -29,8 +30,11 @@ export function ForgotPasswordForm() {
     try {
       await api.auth.forgotPassword(data.email)
       setSent(true)
+      toast.success('If an account exists for that email, a reset link has been sent.')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send reset link. Please try again.')
+      const message = err instanceof Error ? err.message : 'Failed to send reset link. Please try again.'
+      setError(message)
+      toast.error(message)
     }
   }
 

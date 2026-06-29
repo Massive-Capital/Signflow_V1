@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '../components/ui/Button'
-import { loadPdfDocumentCached, resolveSigningDocumentFileUrl } from '../utils/pdf'
+import { loadPdfDocumentCached, clearPdfDocumentCache, resolveSigningDocumentFileUrl } from '../utils/pdf'
 import type { DocumentField } from '../types'
 import { SigningFieldOverlay } from './SigningFieldOverlay'
 
@@ -20,6 +20,8 @@ interface SigningDocumentViewerProps {
   onFieldActivate: (fieldId: string) => void
   onFieldValueChange: (fieldId: string, value: string) => void
   onSignatureRequest: (fieldId: string) => void
+  /** Bust PDF cache when signed content on the server changes. */
+  pdfRevision?: string
   /** Stack every PDF page vertically for continuous scroll (investor embed). */
   showAllPages?: boolean
 }
@@ -46,6 +48,7 @@ interface SigningPdfPageProps {
   onFieldValueChange: (fieldId: string, value: string) => void
   onSignatureRequest: (fieldId: string) => void
   showPageLabel: boolean
+  pdfRevision?: string
   pageRef?: (element: HTMLDivElement | null) => void
 }
 
@@ -66,6 +69,7 @@ function SigningPdfPage({
   onFieldValueChange,
   onSignatureRequest,
   showPageLabel,
+  pdfRevision,
   pageRef,
 }: SigningPdfPageProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -147,7 +151,7 @@ function SigningPdfPage({
       renderTaskRef.current?.cancel()
       renderTaskRef.current = null
     }
-  }, [resolvedFileUrl, pageNumber, layoutWidth])
+  }, [resolvedFileUrl, pageNumber, layoutWidth, pdfRevision])
 
   const showFileError = loadError
 
@@ -216,6 +220,7 @@ export function SigningDocumentViewer({
   onFieldValueChange,
   onSignatureRequest,
   showAllPages = false,
+  pdfRevision,
 }: SigningDocumentViewerProps) {
   const viewerRef = useRef<HTMLDivElement>(null)
   const pageContainerRef = useRef<HTMLDivElement>(null)
@@ -234,6 +239,8 @@ export function SigningDocumentViewer({
       return
     }
 
+    clearPdfDocumentCache(resolvedFileUrl)
+
     let cancelled = false
     void loadPdfDocumentCached(resolvedFileUrl)
       .then((pdf) => {
@@ -246,7 +253,7 @@ export function SigningDocumentViewer({
     return () => {
       cancelled = true
     }
-  }, [resolvedFileUrl, pages])
+  }, [resolvedFileUrl, pages, pdfRevision])
 
   useEffect(() => {
     setCurrentPage((page) => Math.min(page, totalPages))
@@ -378,6 +385,7 @@ export function SigningDocumentViewer({
     onFieldActivate,
     onFieldValueChange,
     onSignatureRequest,
+    pdfRevision,
   }
 
   if (!resolvedFileUrl) {

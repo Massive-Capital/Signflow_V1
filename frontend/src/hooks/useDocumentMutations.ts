@@ -46,7 +46,10 @@ export function useCreateDocument() {
       const pages = await getPdfPageCount(file)
       return api.documents.createWithFile(title, file, pages)
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['documents'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] })
+      toast.success('Document created.')
+    },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Unable to create document.'))
     },
@@ -61,6 +64,7 @@ export function useUploadDocumentFile(documentId: string) {
     onSuccess: (updatedDocument) => {
       queryClient.setQueryData(['document', documentId], updatedDocument)
       queryClient.invalidateQueries({ queryKey: ['documents'] })
+      toast.success('Document file updated.')
     },
     onError: (error) => {
       toast.error(getErrorMessage(error, 'Unable to upload document file.'))

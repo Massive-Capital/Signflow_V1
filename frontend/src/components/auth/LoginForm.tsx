@@ -10,6 +10,7 @@ import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { api } from '../../api/client'
 import { useAuthStore } from '../../stores/authStore'
+import { toast } from '../../utils/toast'
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -34,9 +35,12 @@ export function LoginForm() {
     try {
       const result = await api.auth.login(data.email, data.password)
       login(result.user, result.accessToken, result.refreshToken)
+      toast.success('Signed in successfully.')
       navigate('/dashboard')
     } catch {
-      setError('Invalid credentials. Please try again.')
+      const message = 'Invalid credentials. Please try again.'
+      setError(message)
+      toast.error(message)
     }
   }
 

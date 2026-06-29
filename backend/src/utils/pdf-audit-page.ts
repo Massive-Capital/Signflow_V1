@@ -11,6 +11,7 @@ import type { DocumentRow, FieldRow, RecipientRow } from './mappers';
 import type { RecipientSigningInfo } from '../repositories/signing.repository';
 import { fieldAppliesToProfile } from './profile-field';
 import type { ProfileType } from '../types/domain';
+import { formatCertificateTimestampValue, formatAppTimeZone } from './signing-timestamp';
 
 const PAGE_WIDTH = 612;
 const PAGE_HEIGHT = 792;
@@ -114,20 +115,7 @@ interface StatusPillStyle {
 }
 
 function formatCertificateTimestamp(value?: string | Date): string {
-  if (!value) return '—';
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const year = date.getFullYear();
-  let hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const seconds = date.getSeconds().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  hours = hours % 12 || 12;
-
-  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+  return formatCertificateTimestampValue(value);
 }
 
 function formatEnvelopeId(id: string): string {
@@ -136,19 +124,7 @@ function formatEnvelopeId(id: string): string {
 }
 
 function formatTimeZone(): string {
-  const offsetMinutes = -new Date().getTimezoneOffset();
-  const sign = offsetMinutes >= 0 ? '+' : '-';
-  const absMinutes = Math.abs(offsetMinutes);
-  const hours = Math.floor(absMinutes / 60)
-    .toString()
-    .padStart(2, '0');
-  const minutes = (absMinutes % 60).toString().padStart(2, '0');
-  const tzName =
-    Intl.DateTimeFormat('en-US', { timeZoneName: 'long' })
-      .formatToParts(new Date())
-      .find((part) => part.type === 'timeZoneName')?.value ?? 'Local Time';
-
-  return `(UTC${sign}${hours}:${minutes}) ${tzName}`;
+  return formatAppTimeZone();
 }
 
 function formatRecipientRole(role: string): string {
@@ -1240,7 +1216,7 @@ export async function appendDocumentAuditPage(
       cells: [
         'Signing Complete',
         'Security Checked',
-        formatCertificateTimestamp(input.generatedAt?.toISOString() ?? generatedAt.toISOString()),
+        formatCertificateTimestamp(input.generatedAt ?? generatedAt),
       ],
       boldFirst: true,
       mutedMiddle: true,
@@ -1249,7 +1225,7 @@ export async function appendDocumentAuditPage(
       cells: [
         'Completed',
         'Security Checked',
-        formatCertificateTimestamp(input.generatedAt?.toISOString() ?? generatedAt.toISOString()),
+        formatCertificateTimestamp(input.generatedAt ?? generatedAt),
       ],
       boldFirst: true,
       mutedMiddle: true,

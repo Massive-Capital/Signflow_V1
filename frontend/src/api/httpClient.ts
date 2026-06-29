@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '../config/env'
 import { getEmbedApiKey, isEmbedPortalRoute, readEmbedApiKeyFromSearch } from './embedAuth'
 import { useAuthStore } from '../stores/authStore'
+import { getMachineIpHeaders } from '../utils/machineIp'
 import type { User } from '../types'
 
 function buildUrl(path: string): string {
@@ -44,9 +45,10 @@ async function tryRefreshToken(): Promise<boolean> {
   }
 
   try {
+    const machineIpHeaders = await getMachineIpHeaders()
     const response = await fetch(buildUrl('/auth/refresh'), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...machineIpHeaders },
       body: JSON.stringify({ refreshToken }),
     })
 
@@ -77,6 +79,10 @@ async function refreshTokenOnce(): Promise<boolean> {
   return refreshInFlight
 }
 
+async function buildMachineIpHeaders(): Promise<Record<string, string>> {
+  return getMachineIpHeaders()
+}
+
 async function sendRequest(path: string, options: RequestInit = {}, isRetry = false): Promise<Response> {
   const accessToken = useAuthStore.getState().accessToken
   const embedApiKey = resolveEmbedApiKey()
@@ -85,11 +91,13 @@ async function sendRequest(path: string, options: RequestInit = {}, isRetry = fa
   const attachJwt =
     Boolean(accessToken) && !isPublicSigningPath(path) && !embedApiKey && !onEmbedRoute
   const attachEmbedKey = Boolean(embedApiKey) && !isPublicSigningPath(path)
+  const machineIpHeaders = await buildMachineIpHeaders()
 
   const response = await fetch(buildUrl(path), {
     ...options,
     headers: {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+      ...machineIpHeaders,
       ...(attachJwt ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...(attachEmbedKey ? { Authorization: `Bearer ${embedApiKey}` } : {}),
       ...options.headers,

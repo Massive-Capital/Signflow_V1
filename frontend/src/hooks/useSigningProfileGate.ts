@@ -36,6 +36,7 @@ export function useSigningProfileGate(
       markSigningProfileConfirmed(token)
       setProfileConfirmed(true)
       await queryClient.invalidateQueries({ queryKey: ['signing-session', token] })
+      toast.success('Profile saved.')
     } catch {
       toast.error('Unable to save your profile selection. Please try again.')
     } finally {

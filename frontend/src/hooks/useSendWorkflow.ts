@@ -6,6 +6,7 @@ import type { Document, EmailAttachment, WorkflowType } from '../types'
 import { canSendForSignature } from '../utils/documentSend'
 import { buildInitialSigningOrder, orderRecipientsBySigningOrder } from '../utils/signingOrder'
 import { getErrorMessage, toast } from '../utils/toast'
+import { getMachineIp } from '../utils/machineIp'
 
 const DEFAULT_MESSAGE_HTML = [
   '<p>Hi,</p>',
@@ -103,6 +104,7 @@ export function useSendWorkflow(documentId: string, document?: Document) {
 
     setSending(true)
     try {
+      await getMachineIp()
       const recipients =
         workflowType === 'sequential'
           ? orderRecipientsBySigningOrder(document.recipients, signingOrder)

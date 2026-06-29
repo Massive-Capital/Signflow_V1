@@ -1,5 +1,7 @@
+import { join } from 'path';
 import winston from 'winston';
 import { env } from '../config/env';
+import { ensureLogDirectory } from './log-dir';
 import { PostgresTransport } from './postgres-transport';
 
 const consoleFormat = winston.format.combine(
@@ -12,11 +14,38 @@ const consoleFormat = winston.format.combine(
   }),
 );
 
+const fileFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.errors({ stack: true }),
+  winston.format.json(),
+);
+
 const transports: winston.transport[] = [
   new winston.transports.Console({
     format: consoleFormat,
   }),
 ];
+
+if (env.applicationLogFileEnabled) {
+  const logDir = ensureLogDirectory();
+
+  transports.push(
+    new winston.transports.File({
+      filename: join(logDir, 'combined.log'),
+      level: env.applicationLogFileLevel,
+      format: fileFormat,
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 5,
+    }),
+    new winston.transports.File({
+      filename: join(logDir, 'error.log'),
+      level: 'error',
+      format: fileFormat,
+      maxsize: 10 * 1024 * 1024,
+      maxFiles: 5,
+    }),
+  );
+}
 
 if (env.applicationLogDbEnabled) {
   transports.push(
