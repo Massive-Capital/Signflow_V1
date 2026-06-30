@@ -57,12 +57,16 @@ function isSignatureFieldType(type: string): boolean {
 const TIMESTAMP_FONT_SIZE = 7;
 const TIMESTAMP_GAP = 4;
 /** Minimum share of field width reserved for the signature (timestamp keeps fixed font size). */
-const SIGNATURE_MIN_WIDTH_RATIO = 0.5;
-const SIGNATURE_IMAGE_MAX_SCALE = 1;
-const SIGNATURE_TEXT_MIN_FONT_SIZE = 8;
-const SIGNATURE_TEXT_MAX_FONT_SIZE = 17;
+const SIGNATURE_MIN_WIDTH_RATIO = 0.62;
+const SIGNATURE_IMAGE_MAX_SCALE = 1.35;
+const SIGNATURE_TEXT_MIN_FONT_SIZE = 11;
+const SIGNATURE_TEXT_MAX_FONT_SIZE = 24;
 /** Typed signature text scale — timestamp uses TIMESTAMP_FONT_SIZE above. */
-const SIGNATURE_TEXT_HEIGHT_RATIO = 0.52;
+const SIGNATURE_TEXT_HEIGHT_RATIO = 0.72;
+const FIELD_TEXT_MIN_FONT_SIZE = 10;
+const FIELD_TEXT_MAX_FONT_SIZE = 24;
+const FIELD_TEXT_HEIGHT_RATIO = 0.72;
+const FIELD_PAD_X = 3;
 
 function getSigningTimestampLayout(
   rect: { x: number; y: number; width: number; height: number },
@@ -128,8 +132,9 @@ async function drawFieldValue(
       timestampLayout = getSigningTimestampLayout(rect, signedAt, timestampFont);
     }
     const signatureWidth = timestampLayout?.signatureWidth ?? rect.width;
+    const contentWidth = Math.max(signatureWidth - FIELD_PAD_X * 2, 1);
     const scale = Math.min(
-      signatureWidth / image.width,
+      contentWidth / image.width,
       rect.height / image.height,
       SIGNATURE_IMAGE_MAX_SCALE,
     );
@@ -137,7 +142,7 @@ async function drawFieldValue(
     const imageHeight = image.height * scale;
 
     page.drawImage(image, {
-      x: rect.x,
+      x: rect.x + FIELD_PAD_X,
       y: rect.y + (rect.height - imageHeight) / 2,
       width: imageWidth,
       height: imageHeight,
@@ -171,14 +176,15 @@ async function drawFieldValue(
   if (field.type === 'radio') {
     if (text !== 'selected') return;
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const fontSize = Math.max(7, Math.min(rect.height * 0.55, 11));
+    const fontSize = Math.max(9, Math.min(rect.height * 0.62, 13));
     page.drawText(`(x) ${field.label}`, {
-      x: rect.x + 2,
+      x: rect.x + FIELD_PAD_X,
       y: rect.y + Math.max(0, (rect.height - fontSize) / 2),
       size: fontSize,
       font,
       color: rgb(0.12, 0.16, 0.23),
-      maxWidth: Math.max(rect.width - 4, 1),
+      maxWidth: Math.max(rect.width - FIELD_PAD_X * 2, 1),
+      lineHeight: fontSize * 1.15,
     });
     return;
   }
@@ -193,28 +199,39 @@ async function drawFieldValue(
     ? await pdfDoc.embedFont(StandardFonts.Helvetica)
     : null;
   const timestampLayout =
-    showTimestamp && timestampFont
+    showTimestamp && timestampFont && signedAt
       ? getSigningTimestampLayout(rect, signedAt, timestampFont)
       : null;
-  const availableTextWidth = timestampLayout?.signatureWidth ?? rect.width;
+  const availableTextWidth = Math.max(
+    (timestampLayout?.signatureWidth ?? rect.width) - FIELD_PAD_X * 2,
+    1,
+  );
 
   const fontSize = useScriptFont
     ? Math.max(
         SIGNATURE_TEXT_MIN_FONT_SIZE,
         Math.min(rect.height * SIGNATURE_TEXT_HEIGHT_RATIO, SIGNATURE_TEXT_MAX_FONT_SIZE),
       )
-    : Math.max(9, Math.min(rect.height * 0.68, 22));
-  const textWidth = font.widthOfTextAtSize(displayText, fontSize);
-  const scale = textWidth > availableTextWidth ? availableTextWidth / textWidth : 1;
-  const drawSize = fontSize * scale;
+    : Math.max(
+        FIELD_TEXT_MIN_FONT_SIZE,
+        Math.min(rect.height * FIELD_TEXT_HEIGHT_RATIO, FIELD_TEXT_MAX_FONT_SIZE),
+      );
+
+  let drawSize = fontSize;
+  if (!useScriptFont) {
+    const textWidth = font.widthOfTextAtSize(displayText, fontSize);
+    const scale = textWidth > availableTextWidth ? availableTextWidth / textWidth : 1;
+    drawSize = fontSize * scale;
+  }
 
   page.drawText(displayText, {
-    x: rect.x,
+    x: rect.x + FIELD_PAD_X,
     y: rect.y + Math.max(0, (rect.height - drawSize) / 2),
     size: drawSize,
     font,
     color: rgb(0.12, 0.16, 0.23),
     maxWidth: availableTextWidth,
+    lineHeight: drawSize * 1.15,
   });
 
   if (timestampLayout && timestampFont) {

@@ -52,15 +52,28 @@ export function formatSigningTimestamp(value: Date): string {
 }
 
 /** Certificate of Completion timestamps include a long UTC timezone label. */
+export function splitCertificateTimestamp(value?: string | Date): {
+  dateTime: string;
+  timeZone: string;
+} {
+  if (!value) return { dateTime: '—', timeZone: '' };
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return { dateTime: '—', timeZone: '' };
+  return {
+    dateTime: `${formatSigningDate(date)}, ${formatSigningClock(date)}`,
+    timeZone: formatTimeZoneLabel(date, 'long'),
+  };
+}
+
 export function formatCertificateTimestamp(value: Date): string {
-  return `${formatSigningDate(value)}, ${formatSigningClock(value)} ${formatTimeZoneLabel(value, 'long')}`;
+  const { dateTime, timeZone } = splitCertificateTimestamp(value);
+  return `${dateTime} ${timeZone}`;
 }
 
 export function formatCertificateTimestampValue(value?: string | Date): string {
-  if (!value) return '—';
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return formatCertificateTimestamp(date);
+  const { dateTime, timeZone } = splitCertificateTimestamp(value);
+  if (dateTime === '—') return '—';
+  return timeZone ? `${dateTime} ${timeZone}` : dateTime;
 }
 
 const ISO_DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;

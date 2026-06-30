@@ -8,11 +8,11 @@ export const registerSchema = z.object({
 
 export const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export const refreshSchema = z.object({
-  refreshToken: z.string().min(1, 'Refresh token is required'),
+  refreshToken: z.string().min(1, 'Refresh token is required').optional(),
 });
 
 export const forgotPasswordSchema = z.object({
@@ -26,4 +26,12 @@ export const resetPasswordSchema = z.object({
 
 export const logoutSchema = z.object({
   refreshToken: z.string().optional(),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, 'Verification token is required'),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email('Enter a valid email'),
 });

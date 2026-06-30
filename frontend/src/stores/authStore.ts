@@ -4,35 +4,36 @@ import type { User } from '../types'
 
 interface AuthState {
   user: User | null
-  accessToken: string | null
-  refreshToken: string | null
   isAuthenticated: boolean
   hasHydrated: boolean
-  login: (user: User, accessToken: string, refreshToken: string) => void
+  sessionValidated: boolean
+  login: (user: User) => void
   logout: () => void
   setHasHydrated: (value: boolean) => void
+  setSessionValidated: (value: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
       isAuthenticated: false,
       hasHydrated: false,
-      login: (user, accessToken, refreshToken) =>
-        set({ user, accessToken, refreshToken, isAuthenticated: true }),
+      sessionValidated: false,
+      login: (user) => set({ user, isAuthenticated: true, sessionValidated: true }),
       logout: () =>
-        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
+        set({
+          user: null,
+          isAuthenticated: false,
+          sessionValidated: true,
+        }),
       setHasHydrated: (value) => set({ hasHydrated: value }),
+      setSessionValidated: (value) => set({ sessionValidated: value }),
     }),
     {
       name: 'signflow-auth',
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
@@ -44,7 +45,10 @@ export const useAuthStore = create<AuthState>()(
 
 export function useAuthReady(): boolean {
   const hasHydrated = useAuthStore((s) => s.hasHydrated)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const accessToken = useAuthStore((s) => s.accessToken)
-  return hasHydrated && isAuthenticated && !!accessToken
+  const sessionValidated = useAuthStore((s) => s.sessionValidated)
+  return hasHydrated && sessionValidated
+}
+
+export function useIsAuthenticated(): boolean {
+  return useAuthStore((s) => s.isAuthenticated)
 }

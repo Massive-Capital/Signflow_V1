@@ -6,6 +6,7 @@ interface CreateWebhookInput {
   url: string;
   events: string[];
   secretHash: string;
+  secretCiphertext: string;
   retries?: number;
 }
 
@@ -20,10 +21,17 @@ export class WebhookRepository {
 
   async create(input: CreateWebhookInput): Promise<WebhookRow> {
     const result = await pool.query<WebhookRow>(
-      `INSERT INTO webhooks (organization_id, url, events, secret_hash, retries)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO webhooks (organization_id, url, events, secret_hash, secret_ciphertext, retries)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [input.organizationId, input.url, input.events, input.secretHash, input.retries ?? 3],
+      [
+        input.organizationId,
+        input.url,
+        input.events,
+        input.secretHash,
+        input.secretCiphertext,
+        input.retries ?? 3,
+      ],
     );
     return result.rows[0];
   }

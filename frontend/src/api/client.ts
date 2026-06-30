@@ -25,7 +25,7 @@ function buildQuery(params: Record<string, string | undefined>): string {
 export const api = {
   auth: {
     login: (email: string, password: string) =>
-      apiRequest<{ accessToken: string; refreshToken: string; user: User }>('/auth/login', {
+      apiRequest<{ user: User }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       }),
@@ -46,6 +46,26 @@ export const api = {
       apiRequest<{ message: string }>('/auth/reset-password', {
         method: 'POST',
         body: JSON.stringify({ token, password }),
+      }),
+
+    verifyEmail: (token: string) =>
+      apiRequest<{ message: string }>('/auth/verify-email', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      }),
+
+    resendVerification: (email: string) =>
+      apiRequest<{ message: string }>('/auth/resend-verification', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+
+    me: () => apiRequest<{ user: User }>('/auth/me'),
+
+    logout: () =>
+      apiRequest<void>('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({}),
       }),
   },
 

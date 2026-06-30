@@ -15,7 +15,7 @@ export function DashboardPage() {
     <div>
       <PageHeader title="Dashboard" description="Overview of your signing activity and usage" />
 
-      {isLoading ? <LoadingState message="Loading stats..." /> : stats && <DashboardStatsGrid stats={stats} />}
+      {isLoading ? <LoadingState label="Loading stats" /> : stats && <DashboardStatsGrid stats={stats} />}
 
       <div className="page-grid dashboard-page-grid page-section">
         <RecentDocuments documents={recentDocs} />

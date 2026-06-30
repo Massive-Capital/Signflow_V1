@@ -1,35 +1,49 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { LoadingState } from './common/LoadingState'
-import { useAuthStore } from '../stores/authStore'
+import { useAuthReady, useIsAuthenticated } from '../stores/authStore'
 
 export function ProtectedRoute() {
-  const hasHydrated = useAuthStore((s) => s.hasHydrated)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const accessToken = useAuthStore((s) => s.accessToken)
+  const authReady = useAuthReady()
+  const isAuthenticated = useIsAuthenticated()
+  const location = useLocation()
 
-  if (!hasHydrated) {
-    return <LoadingState message="Loading session..." />
+  if (!authReady) {
+    return <LoadingState fullPage />
   }
 
-  if (!isAuthenticated || !accessToken) {
-    return <Navigate to="/login" replace />
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location }} />
   }
 
   return <Outlet />
 }
 
 export function PublicRoute() {
-  const hasHydrated = useAuthStore((s) => s.hasHydrated)
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const accessToken = useAuthStore((s) => s.accessToken)
+  const authReady = useAuthReady()
+  const isAuthenticated = useIsAuthenticated()
 
-  if (!hasHydrated) {
-    return <LoadingState message="Loading session..." />
+  if (!authReady) {
+    return <LoadingState fullPage />
   }
 
-  if (isAuthenticated && accessToken) {
+  if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />
   }
 
   return <Outlet />
+}
+
+export function RootRedirect() {
+  const authReady = useAuthReady()
+  const isAuthenticated = useIsAuthenticated()
+
+  if (!authReady) {
+    return <LoadingState fullPage />
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return <Navigate to="/login" replace />
 }

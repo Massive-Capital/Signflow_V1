@@ -95,6 +95,7 @@ export interface WebhookRow {
   url: string;
   events: string[];
   secret_hash: string;
+  secret_ciphertext: string | null;
   retries: number;
   active: boolean;
   created_at: Date;

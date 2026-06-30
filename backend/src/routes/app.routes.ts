@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authenticate } from '../middleware/auth.middleware';
 import { loadAuthContext, requirePermission, requireUserAuth } from '../middleware/user-context.middleware';
+import { signingRateLimiter, uploadRateLimiter } from '../middleware/security.middleware';
 import { validateBody } from '../middleware/validate.middleware';
 import { validateCreateDocument } from '../middleware/document-create.middleware';
 import { dashboardController } from '../controllers/dashboard.controller';
@@ -76,6 +77,7 @@ router.post(
   '/documents',
   ...auth,
   requirePermission('documents:write'),
+  uploadRateLimiter,
   optionalCreateDocumentUpload,
   handleUploadError,
   validateCreateDocument,
@@ -98,6 +100,7 @@ router.post(
   '/documents/:id/file',
   ...auth,
   requirePermission('documents:write'),
+  uploadRateLimiter,
   documentUpload.single('file'),
   handleUploadError,
   documentController.uploadFile,
@@ -150,18 +153,20 @@ router.post(
   webhookController.create,
 );
 
-router.get('/signing/sessions/:token/file', signingController.serveDocument);
-router.get('/signing/sessions/:token', signingController.getSession);
+router.get('/signing/sessions/:token/file', signingRateLimiter, signingController.serveDocument);
+router.get('/signing/sessions/:token', signingRateLimiter, signingController.getSession);
 router.post(
   '/signing/sessions/:token/complete',
+  signingRateLimiter,
   validateBody(completeSigningSchema),
   signingController.complete,
 );
-router.post('/signing/sessions/:token/decline', signingController.decline);
-router.get('/signing/sessions/:token/download', signingController.download);
-router.get('/signing/sessions/:token/preview', signingController.preview);
+router.post('/signing/sessions/:token/decline', signingRateLimiter, signingController.decline);
+router.get('/signing/sessions/:token/download', signingRateLimiter, signingController.download);
+router.get('/signing/sessions/:token/preview', signingRateLimiter, signingController.preview);
 router.post(
   '/signing/sessions/:token/profile',
+  signingRateLimiter,
   validateBody(setSigningProfileSchema),
   signingController.setProfile,
 );

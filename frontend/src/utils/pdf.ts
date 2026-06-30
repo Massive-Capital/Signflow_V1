@@ -1,8 +1,8 @@
 import { API_BASE_URL } from '../config/env'
 import { formatDateFieldValue } from './date'
 import { getMachineIpHeaders } from './machineIp'
-import { useAuthStore } from '../stores/authStore'
 import { getEmbedApiKey, isEmbedPortalRoute, readEmbedApiKeyFromSearch } from '../api/embedAuth'
+import { getEmbedRequestHeaders } from './embedHeaders'
 import { getDocument, GlobalWorkerOptions, type PDFDocumentProxy } from 'pdfjs-dist'
 
 GlobalWorkerOptions.workerSrc = new URL(
@@ -71,19 +71,21 @@ export async function fetchPdfArrayBuffer(fileUrl: string): Promise<ArrayBuffer>
     const embedKey =
       getEmbedApiKey() ??
       (isEmbedPortalRoute() ? readEmbedApiKeyFromSearch(window.location.search) : null)
-    const token = useAuthStore.getState().accessToken
     if (embedKey) {
       headers.Authorization = `Bearer ${embedKey}`
-    } else if (token && !isEmbedPortalRoute()) {
-      headers.Authorization = `Bearer ${token}`
-    } else {
-      throw new Error('You do not have access to this document file.')
     }
+  }
+
+  if (isEmbedPortalRoute() && isSigningSessionFileUrl(url)) {
+    Object.assign(headers, getEmbedRequestHeaders())
   }
 
   Object.assign(headers, await getMachineIpHeaders())
 
-  const response = await fetch(url, { headers, credentials: 'omit' })
+  const response = await fetch(url, {
+    headers,
+    credentials: requiresAuthenticatedPdfFetch(url) ? 'include' : 'omit',
+  })
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error('Document file not found. Please upload the PDF again.')

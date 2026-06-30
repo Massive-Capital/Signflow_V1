@@ -1,7 +1,9 @@
 import { webhookRepository } from '../repositories/webhook.repository';
 import type { AuthContext, Webhook } from '../types/domain';
-import { generateSecureToken, hashToken } from '../utils/crypto';
+import { decryptSecret, encryptSecret, generateSecureToken, hashToken } from '../utils/crypto';
 import { toWebhook } from '../utils/mappers';
+import { assertWebhookUrlAllowed } from '../utils/webhook-url';
+import { buildWebhookSignatureHeaders } from '../utils/webhook-signature';
 
 export class WebhookService {
   async list(auth: AuthContext): Promise<Webhook[]> {
@@ -10,6 +12,8 @@ export class WebhookService {
   }
 
   async create(auth: AuthContext, url: string, events: string[]): Promise<Webhook> {
+    assertWebhookUrlAllowed(url);
+
     const secret = `whsec_${generateSecureToken(12)}`;
 
     const row = await webhookRepository.create({
@@ -17,6 +21,7 @@ export class WebhookService {
       url,
       events,
       secretHash: hashToken(secret),
+      secretCiphertext: encryptSecret(secret),
     });
 
     return toWebhook(row, secret);
@@ -28,10 +33,29 @@ export class WebhookService {
 
     for (const webhook of webhooks) {
       try {
+        assertWebhookUrlAllowed(webhook.url);
+
+        const body = JSON.stringify({
+          event,
+          payload,
+          timestamp: new Date().toISOString(),
+          webhookId: webhook.id,
+        });
+
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (webhook.secret_ciphertext) {
+          try {
+            const secret = decryptSecret(webhook.secret_ciphertext);
+            Object.assign(headers, buildWebhookSignatureHeaders(secret, body));
+          } catch (error) {
+            console.error(`Webhook signing unavailable for ${webhook.url}:`, error);
+          }
+        }
+
         await fetch(webhook.url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event, payload, timestamp: new Date().toISOString() }),
+          headers,
+          body,
         });
       } catch (error) {
         console.error(`Webhook delivery failed for ${webhook.url}:`, error);

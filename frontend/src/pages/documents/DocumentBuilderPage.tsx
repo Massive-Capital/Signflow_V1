@@ -34,7 +34,7 @@ export function DocumentBuilderPage() {
     return (
       <>
         <PageTitle title="Document Builder" />
-        <LoadingState message="Loading document builder..." />
+        <LoadingState label="Loading document builder" />
       </>
     )
   }
@@ -105,7 +105,7 @@ export function DocumentBuilderPage() {
           onUpdateFieldLabel={builder.updateFieldLabel}
           onEditFieldProfileScope={builder.openEditFieldProfileScope}
         />
-        <Suspense fallback={<LoadingState message="Loading document preview..." />}>
+        <Suspense fallback={<LoadingState label="Loading document preview" />}>
           <PdfCanvas
             documentId={id}
             fileUrl={builder.document.fileUrl}

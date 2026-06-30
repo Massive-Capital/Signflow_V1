@@ -1,4 +1,5 @@
 import { isEmailConfigured } from '../functions/sendEmail';
+import { sendEmailVerificationEmail } from '../functions/emailVerificationEmail';
 import { sendPasswordResetEmail as sendPasswordReset } from '../functions/passwordResetEmail';
 import {
   sendSigningInviteEmail,
@@ -18,6 +19,16 @@ export class EmailService {
     }
 
     await sendPasswordReset(email, resetToken);
+  }
+
+  async sendEmailVerification(email: string, verificationToken: string): Promise<void> {
+    if (!isEmailConfigured()) {
+      throw new Error(
+        'Email is not configured. Set EMAIL_SERVICE_TYPE and SENDER_EMAIL_ID / SENDER_EMAIL_PASSWORD in backend/.env.local',
+      );
+    }
+
+    await sendEmailVerificationEmail(email, verificationToken);
   }
 
   async sendSigningInvite(input: SigningInviteEmailInput): Promise<void> {

@@ -425,12 +425,13 @@ body.signing-portal {
   border: 2px dashed;
   border-radius: var(--radius);
   background: rgba(37, 99, 235, 0.08);
-  font-size: 0.65rem;
+  container-type: size;
+  font-size: clamp(0.7rem, 24cqmin, 0.95rem);
   font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.1rem;
+  padding: 0.15rem 0.25rem;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -456,7 +457,7 @@ body.signing-portal {
   min-height: 0;
   min-width: 0;
   width: auto;
-  max-width: 62%;
+  max-width: 70%;
   height: 100%;
   object-fit: contain;
   object-position: left center;
@@ -465,13 +466,15 @@ body.signing-portal {
 .signing-field-signature-content .signing-field-text {
   flex: 1 1 0;
   min-width: 0;
-  max-width: 68%;
+  max-width: 72%;
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 1.2;
-  font-size: 1.2em;
+  line-height: 1.15;
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+  font-size: clamp(0.9rem, 42cqmin, 1.4rem);
 }
 
 .signing-field-timestamp {
@@ -498,7 +501,7 @@ body.signing-portal {
 }
 
 .signing-field--readonly .signing-field-text {
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 28cqmin, 1rem);
   color: #334155;
   padding: 2px 4px;
   overflow: hidden;
@@ -520,7 +523,7 @@ body.signing-portal {
   border: none;
   background: transparent;
   font: inherit;
-  font-size: inherit;
+  font-size: clamp(0.7rem, 24cqmin, 0.95rem);
   color: #1e293b;
   padding: 0.15rem 0.25rem;
   outline: none;

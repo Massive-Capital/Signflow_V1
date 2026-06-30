@@ -48,7 +48,7 @@ export function DocumentsPage() {
         onStatusChange={handleStatusChange}
       />
       {isLoading ? (
-        <LoadingState message="Loading documents..." />
+        <LoadingState />
       ) : (
         <DocumentTable
           documents={documents}

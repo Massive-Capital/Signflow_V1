@@ -31,6 +31,12 @@ export function createCorsOptions(): CorsOptions {
       callback(null, false);
     },
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Client-Machine-Ip'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Client-Machine-Ip',
+      'X-SignFlow-Embed',
+      'X-SignFlow-Parent-Origin',
+    ],
   };
 }

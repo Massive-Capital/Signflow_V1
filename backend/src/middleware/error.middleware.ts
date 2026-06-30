@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { env } from '../config/env';
 import { logApplicationEvent } from '../logging/logger';
+import { captureMonitoringException } from '../monitoring';
 import { AppError } from '../utils/app-error';
 import { getClientIp } from '../utils/client-ip';
 import { parseUserAgent } from '../utils/user-agent';
@@ -66,6 +67,8 @@ export function errorHandler(
       stack: error instanceof Error ? error.stack : undefined,
     },
   });
+
+  captureMonitoringException(error, logContext);
 
   res.status(500).json({
     error: {

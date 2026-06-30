@@ -50,6 +50,15 @@ export class UserRepository {
       [passwordHash, userId],
     );
   }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    await pool.query(
+      `UPDATE users
+       SET email_verified = TRUE, updated_at = NOW()
+       WHERE id = $1`,
+      [userId],
+    );
+  }
 }
 
 export const userRepository = new UserRepository();

@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { DashboardLayout } from '../components/layouts/DashboardLayout'
-import { ProtectedRoute, PublicRoute } from '../components/ProtectedRoute'
+import { ProtectedRoute, PublicRoute, RootRedirect } from '../components/ProtectedRoute'
 import { LoginPage } from '../pages/auth/LoginPage'
 import { RegisterPage } from '../pages/auth/RegisterPage'
 import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage'
@@ -71,7 +71,7 @@ export function AppRoutes() {
           <Route path="/*" element={<DashboardRoutes />} />
         </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<RootRedirect />} />
       </Routes>
     </BrowserRouter>
   )

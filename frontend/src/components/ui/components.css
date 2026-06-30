@@ -147,6 +147,22 @@
   }
 }
 
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  color: var(--color-primary);
+}
+
+.loading-state--full-page {
+  min-height: 100vh;
+}
+
+.loading-state-spinner {
+  animation: icon-spin 0.85s linear infinite;
+}
+
 a.btn {
   text-decoration: none;
   display: inline-flex;
