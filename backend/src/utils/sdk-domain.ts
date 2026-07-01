@@ -42,10 +42,9 @@ export function assertEmbedOriginAllowed(
   parentOrigin: string | undefined,
   allowedDomains: string[],
 ): void {
+  // Non-production: allow portal embeds from any host/port (local dev, LAN, tunnels).
   if (!env.isProduction) {
-    if (!parentOrigin) return;
-    if (isOriginAllowed(parentOrigin, allowedDomains)) return;
-    if (isLocalDevOrigin(parentOrigin)) return;
+    return;
   }
 
   if (allowedDomains.length === 0) {
@@ -62,15 +61,6 @@ export function assertEmbedOriginAllowed(
 
   if (!isOriginAllowed(parentOrigin, allowedDomains)) {
     throw new AppError('Embed origin is not allowed for this organization', 403, 'EMBED_ORIGIN_FORBIDDEN');
-  }
-}
-
-function isLocalDevOrigin(origin: string): boolean {
-  try {
-    const url = new URL(origin);
-    return url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1');
-  } catch {
-    return false;
   }
 }
 

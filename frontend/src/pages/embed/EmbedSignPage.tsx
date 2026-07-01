@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useEffect, useLayoutEffect } from 'react'
+import { useParams, useSearchParams } from 'react-router-dom'
+import { setEmbedApiKey } from '../../api/embedAuth'
 import { useQueryClient } from '@tanstack/react-query'
 import { api } from '../../api/client'
 import { prefetchMachineIp } from '../../utils/machineIp'
@@ -12,7 +13,13 @@ import './embed.css'
 
 export function EmbedSignPage() {
   const { token } = useParams<{ token: string }>()
+  const [searchParams] = useSearchParams()
+  const apiKey = searchParams.get('apiKey')?.trim() ?? ''
   const queryClient = useQueryClient()
+
+  useLayoutEffect(() => {
+    if (apiKey) setEmbedApiKey(apiKey)
+  }, [apiKey])
   const { data, isLoading, error } = useSigningSession(token)
   const {
     needsProfileStep,

@@ -15,6 +15,7 @@ import type { ProfileType } from '../types/domain';
 import { applyResolvedRadioGroups } from '../utils/radio-field';
 import { isInvestorSponsorWorkflow } from '../utils/investor-sponsor-workflow';
 import { assertEmbedOriginAllowed } from '../utils/sdk-domain';
+import { replicateRecipientSignatureFieldValues } from '../utils/replicate-signature-fields';
 
 export interface SigningEmbedContext {
   isEmbed: boolean;
@@ -159,7 +160,15 @@ export class SigningService {
     await this.assertEmbedAccessAllowed(session.document_id, embed);
 
     if (fieldValues && Object.keys(fieldValues).length > 0) {
-      await documentRepository.updateFieldValues(session.document_id, fieldValues);
+      const recipientFields = await documentRepository.findFields(session.document_id);
+      const scopedFields = recipientFields.filter(
+        (field) => field.recipient_id === session.recipient_id,
+      );
+      const replicatedValues = replicateRecipientSignatureFieldValues(
+        scopedFields,
+        fieldValues,
+      );
+      await documentRepository.updateFieldValues(session.document_id, replicatedValues);
     }
 
     const completedSession = await signingRepository.markCompleted(tokenHash, clientIp);

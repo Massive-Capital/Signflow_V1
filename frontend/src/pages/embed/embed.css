@@ -431,6 +431,18 @@ body.signflow-embed.signing-portal {
 
 }
 
+.embed-builder-layout .field-panel-section-header {
+  margin-bottom: 0.5rem;
+}
+
+.embed-builder-layout .field-panel-section-header h3 {
+  margin-bottom: 0;
+}
+
+.embed-builder-layout .profile-preview-toggle {
+  font-size: 0.625rem;
+}
+
 
 
 .embed-builder-layout .profile-type-preview-hint,

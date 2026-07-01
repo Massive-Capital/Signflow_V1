@@ -1,5 +1,6 @@
 import type { DocumentField, FieldType } from '../types'
 import { formatDisplayDateTime } from '../utils/date'
+import { sanitizeNumberInput } from '../utils/numberField'
 import { formatFieldDisplayValue, getSignatureImageSrc } from '../utils/pdf'
 import { getRadioGroupId } from '../utils/radioField'
 
@@ -214,6 +215,33 @@ export function SigningFieldOverlay({
           value={inputValue}
           placeholder={field.label}
           onChange={(event) => onValueChange(event.target.value)}
+          onFocus={onActivate}
+          aria-label={field.label}
+        />
+      </div>
+    )
+  }
+
+  if (field.type === 'number') {
+    return (
+      <div
+        className={`signing-field signing-field--input signing-field--number ${isActive ? 'active' : ''} ${isFilled ? 'filled' : ''}`}
+        style={{
+          left: `${field.x}%`,
+          top: `${field.y}%`,
+          width: `${field.width}%`,
+          height: `${field.height}%`,
+          borderColor,
+        }}
+        onClick={onActivate}
+      >
+        <input
+          type="text"
+          inputMode="decimal"
+          className="signing-field-input"
+          value={inputValue}
+          placeholder={field.label}
+          onChange={(event) => onValueChange(sanitizeNumberInput(event.target.value))}
           onFocus={onActivate}
           aria-label={field.label}
         />

@@ -21,6 +21,8 @@ export function shouldChooseSigningProfile(
   const recipient = document.recipients.find((item) => item.id === recipientId)
   if (!recipient || recipient.role !== 'buyer') return false
 
+  if (recipient.profileType) return false
+
   return isInvestorSponsorWorkflow(document.recipients)
 }
 

@@ -9,6 +9,7 @@ export class EmbedController {
       recipientEmail?: string;
       recipientId?: string;
       investorRecipientId?: string;
+      profileType?: string;
     };
     const result = await embedService.createSigningSession(
       req.auth!,
@@ -17,6 +18,7 @@ export class EmbedController {
         recipientEmail: body.recipientEmail,
         recipientId: body.recipientId,
         investorRecipientId: body.investorRecipientId,
+        profileType: body.profileType,
       },
     );
     res.status(201).json(result);

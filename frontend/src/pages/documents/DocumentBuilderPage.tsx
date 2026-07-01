@@ -90,6 +90,8 @@ export function DocumentBuilderPage() {
       <div className="builder-layout">
         <FieldTypePanel
           activeProfileType={builder.activeProfileType}
+          canUseProfilePreview={builder.canUseProfilePreview}
+          previewProfileMode={builder.previewProfileMode}
           isProfilePreviewEnabled={builder.isProfilePreviewEnabled}
           selectedFieldType={builder.selectedFieldType}
           newFieldRequired={builder.newFieldRequired}
@@ -97,6 +99,7 @@ export function DocumentBuilderPage() {
           recipients={builder.document.recipients}
           getFieldColor={builder.getFieldColor}
           onSelectProfileType={builder.setSelectedProfileType}
+          onProfilePreviewModeChange={builder.setPreviewProfileMode}
           onSelectFieldType={builder.setSelectedFieldType}
           onNewFieldRequiredChange={builder.setNewFieldRequired}
           onToggleFieldRequired={builder.setFieldRequired}

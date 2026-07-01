@@ -137,7 +137,8 @@ export const FIELD_TYPES: { type: FieldType; label: string; icon: string }[] = [
   { type: 'signature', label: 'Signature', icon: '✍' },
   { type: 'initial', label: 'Initial', icon: '🔤' },
   { type: 'date', label: 'Date', icon: '📅' },
-  { type: 'text', label: 'Text', icon: '📝' },
+  { type: 'text', label: 'Text/Name', icon: '📝' },
+  { type: 'number', label: 'Number', icon: '🔢' },
   { type: 'checkbox', label: 'Checkbox', icon: '☑' },
   { type: 'radio', label: 'Radio', icon: '⭕' },
   { type: 'address', label: 'Address', icon: '🏠' },
@@ -155,6 +156,8 @@ export function getDefaultFieldSize(type: FieldType): { width: number; height: n
       return { width: 4, height: 3 }
     case 'radio':
       return { width: 18, height: 3.5 }
+    case 'number':
+      return { width: 16, height: 3.5 }
     default:
       return { width: 14, height: 3.5 }
   }

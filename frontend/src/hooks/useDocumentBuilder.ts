@@ -68,6 +68,7 @@ export function useDocumentBuilder(
   const [selectedProfileType, setSelectedProfileType] = useState<ProfileType>('individual')
   const [previewProfileType, setPreviewProfileType] = useState<ProfileType>('individual')
   const [defaultProfileScope, setDefaultProfileScope] = useState<ProfileScopeSelection>('all')
+  const [previewProfileMode, setPreviewProfileMode] = useState(false)
   const [pendingFieldPlacement, setPendingFieldPlacement] = useState<PendingFieldPlacement | null>(null)
   const [editingFieldProfileId, setEditingFieldProfileId] = useState<string | null>(null)
   const [recipientModal, setRecipientModal] = useState<RecipientModalState>(null)
@@ -149,9 +150,10 @@ export function useDocumentBuilder(
   const canSaveTemplate = embedMode
     ? canSaveEmbedTemplate(document.fields, recipients)
     : false
-  const isProfilePreviewEnabled = embedMode
+  const canUseProfilePreview = embedMode
     ? usesInvestorSponsorWorkflow
     : recipients.some((recipient) => recipient.role === 'buyer')
+  const isProfilePreviewEnabled = previewProfileMode && canUseProfilePreview
   const activeProfileColor = isProfilePreviewEnabled
     ? getProfileTypeColor(previewProfileType)
     : getRecipientRoleColor(selectedAssignRole)
@@ -563,6 +565,9 @@ export function useDocumentBuilder(
     activeRecipientId,
     activeAssignRole: selectedAssignRole,
     isProfileTypeEnabled,
+    canUseProfilePreview,
+    previewProfileMode,
+    setPreviewProfileMode,
     isProfilePreviewEnabled,
     activeProfileType: previewProfileType,
     activeProfileColor,

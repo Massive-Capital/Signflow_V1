@@ -12,6 +12,8 @@ import type { DocumentField, FieldType, ProfileType, Recipient } from '../../typ
 
 interface FieldTypePanelProps {
   activeProfileType: ProfileType
+  canUseProfilePreview: boolean
+  previewProfileMode: boolean
   isProfilePreviewEnabled: boolean
   selectedFieldType: FieldType
   newFieldRequired: boolean
@@ -19,6 +21,7 @@ interface FieldTypePanelProps {
   recipients: Recipient[]
   getFieldColor: (field: DocumentField) => string
   onSelectProfileType: (profileType: ProfileType) => void
+  onProfilePreviewModeChange: (enabled: boolean) => void
   onSelectFieldType: (type: FieldType) => void
   onNewFieldRequiredChange: (required: boolean) => void
   onToggleFieldRequired: (fieldId: string, required: boolean) => void
@@ -30,6 +33,8 @@ interface FieldTypePanelProps {
 
 export function FieldTypePanel({
   activeProfileType,
+  canUseProfilePreview,
+  previewProfileMode,
   isProfilePreviewEnabled,
   selectedFieldType,
   newFieldRequired,
@@ -37,6 +42,7 @@ export function FieldTypePanel({
   recipients,
   getFieldColor,
   onSelectProfileType,
+  onProfilePreviewModeChange,
   onSelectFieldType,
   onNewFieldRequiredChange,
   onToggleFieldRequired,
@@ -47,10 +53,22 @@ export function FieldTypePanel({
 }: FieldTypePanelProps) {
   return (
     <aside className="field-panel">
-      <h3>Preview Profile Type</h3>
+      <div className="field-panel-section-header">
+        <h3>Preview Profile Type</h3>
+        <label className="profile-preview-toggle">
+          <input
+            type="checkbox"
+            checked={previewProfileMode}
+            disabled={!canUseProfilePreview}
+            onChange={(event) => onProfilePreviewModeChange(event.target.checked)}
+          />
+          <span>Preview</span>
+        </label>
+      </div>
       <p className="profile-type-preview-hint">
-        Preview which fields appear for each investor profile. When placing a field, choose its
-        profile scope — click the profile badge on any placed field to change it later.
+        {isProfilePreviewEnabled
+          ? 'Preview which fields appear for each investor profile. When placing a field, choose its profile scope — click the profile badge on any placed field to change it later.'
+          : 'All profile-specific fields are shown on the document. Enable preview to filter fields by investor profile.'}
       </p>
       <div className={`profile-type-list ${isProfilePreviewEnabled ? '' : 'profile-type-list--disabled'}`}>
         {PROFILE_TYPE_OPTIONS.map((option) => {
@@ -84,7 +102,7 @@ export function FieldTypePanel({
           )
         })}
       </div>
-      {!isProfilePreviewEnabled && (
+      {!canUseProfilePreview && (
         <p className="profile-type-disabled-hint">
           {recipients.some((recipient) => recipient.role === 'buyer') &&
           !recipients.some((recipient) => recipient.role === 'seller')
@@ -120,6 +138,12 @@ export function FieldTypePanel({
       {selectedFieldType === 'radio' && (
         <p className="field-type-hint">
           Place the first option, then click + on any option to add another field in the same group. Clients can choose only one.
+        </p>
+      )}
+
+      {selectedFieldType === 'number' && (
+        <p className="field-type-hint">
+          Signers can enter digits only. Formatting such as commas and decimals is preserved (e.g. 1,234.50).
         </p>
       )}
 

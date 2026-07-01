@@ -145,6 +145,8 @@ export function EmbedDocumentBuilder() {
 
         <FieldTypePanel
           activeProfileType={builder.activeProfileType}
+          canUseProfilePreview={builder.canUseProfilePreview}
+          previewProfileMode={builder.previewProfileMode}
           isProfilePreviewEnabled={builder.isProfilePreviewEnabled}
           selectedFieldType={builder.selectedFieldType}
           newFieldRequired={builder.newFieldRequired}
@@ -152,6 +154,7 @@ export function EmbedDocumentBuilder() {
           recipients={builder.document.recipients}
           getFieldColor={builder.getFieldColor}
           onSelectProfileType={builder.setSelectedProfileType}
+          onProfilePreviewModeChange={builder.setPreviewProfileMode}
           onSelectFieldType={builder.setSelectedFieldType}
           onNewFieldRequiredChange={builder.setNewFieldRequired}
           onToggleFieldRequired={builder.setFieldRequired}

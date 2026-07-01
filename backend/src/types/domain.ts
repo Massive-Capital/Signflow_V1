@@ -4,6 +4,7 @@ export type FieldType =
   | 'initial'
   | 'date'
   | 'text'
+  | 'number'
   | 'checkbox'
   | 'radio'
   | 'address'

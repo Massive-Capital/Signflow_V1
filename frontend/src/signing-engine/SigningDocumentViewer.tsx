@@ -264,10 +264,10 @@ export function SigningDocumentViewer({
     if (!activeFieldId) return
 
     const activeField = fields.find((field) => field.id === activeFieldId)
-    if (activeField && activeField.page !== currentPage) {
+    if (activeField) {
       setCurrentPage(activeField.page)
     }
-  }, [activeFieldId, fields, currentPage, showAllPages])
+  }, [activeFieldId, fields, showAllPages])
 
   useLayoutEffect(() => {
     if (!showAllPages || !activeFieldId) return

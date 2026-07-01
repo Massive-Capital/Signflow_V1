@@ -1,7 +1,7 @@
 import { env } from '../config/env';
 import { documentRepository } from '../repositories/document.repository';
 import { signingRepository } from '../repositories/signing.repository';
-import type { AuthContext } from '../types/domain';
+import type { AuthContext, ProfileType } from '../types/domain';
 import { AppError } from '../utils/app-error';
 import { generateSecureToken, hashToken } from '../utils/crypto';
 import {
@@ -24,6 +24,8 @@ export interface CreateEmbedSigningSessionInput {
   recipientId?: string;
   /** Required when multiple investors need sponsor counter-signature. */
   investorRecipientId?: string;
+  /** Pre-select investor profile (skips profile chooser in embed). */
+  profileType?: string;
 }
 
 export interface EmbedSigningSessionResult {
@@ -90,6 +92,19 @@ export const embedService = {
 
     if (!recipient) {
       throw new AppError('Recipient not found on this document', 404, 'NOT_FOUND');
+    }
+
+    const profileType = input.profileType?.trim() as ProfileType | undefined;
+    if (
+      profileType &&
+      recipient.role === 'buyer' &&
+      isInvestorSponsorWorkflow(recipients)
+    ) {
+      await documentRepository.updateRecipientProfileType(
+        documentId,
+        recipient.id,
+        profileType,
+      );
     }
 
     let investorRecipientId: string | undefined;

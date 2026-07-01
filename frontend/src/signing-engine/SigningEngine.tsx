@@ -13,6 +13,10 @@ import {
 } from '../utils/radioField'
 import { formatDisplayDate } from '../utils/date'
 import { fieldAppliesToProfile } from '../utils/profileField'
+import {
+  replicateRecipientSigningFieldValues,
+  replicateRecipientSigningSignedAt,
+} from '../utils/replicateSigningFieldValues'
 import { getRecipientRoleColor } from '../constants/fieldTypes'
 import { Button } from '../components/ui/Button'
 import type { Document, SigningMode } from '../types'
@@ -216,7 +220,17 @@ export function SigningEngine({
   }, [applyBranding])
 
   const handleFieldActivate = (fieldId: string) => {
-    const index = recipientFields.findIndex((field) => field.id === fieldId)
+    let index = requiredFields.findIndex((field) => field.id === fieldId)
+    if (index < 0) {
+      const field = document.fields.find((item) => item.id === fieldId)
+      if (field?.type === 'radio') {
+        const groupId = getRadioGroupId(field, document.fields)
+        index = requiredFields.findIndex((item) => {
+          if (item.type !== 'radio') return false
+          return getRadioGroupId(item, document.fields) === groupId
+        })
+      }
+    }
     if (index >= 0) {
       setCurrentFieldIndex(index)
     }
@@ -242,19 +256,29 @@ export function SigningEngine({
   const handleSignatureSave = (value: string) => {
     if (activeSignatureFieldId) {
       const signedAt = new Date().toISOString()
-      const nextFieldValues = { ...fieldValues, [activeSignatureFieldId]: value }
-
-      setFieldValue(activeSignatureFieldId, value)
-      setFieldSignedAt(activeSignatureFieldId, signedAt)
+      const replicatedValues = replicateRecipientSigningFieldValues(
+        recipientFields,
+        fieldValues,
+        activeSignatureFieldId,
+        value,
+      )
+      const replicatedSignedAt = replicateRecipientSigningSignedAt(
+        recipientFields,
+        fieldSignedAt,
+        activeSignatureFieldId,
+        signedAt,
+      )
 
       const dateUpdates: Record<string, string> = {}
       for (const field of recipientFields) {
-        if (field.type === 'date' && !nextFieldValues[field.id]) {
+        if (field.type === 'date' && !replicatedValues[field.id]) {
           dateUpdates[field.id] = formatDisplayDate(signedAt)
         }
       }
-      if (Object.keys(dateUpdates).length > 0) {
-        setFieldValues(dateUpdates)
+
+      setFieldValues({ ...replicatedValues, ...dateUpdates })
+      for (const [fieldId, fieldSignedAtValue] of Object.entries(replicatedSignedAt)) {
+        setFieldSignedAt(fieldId, fieldSignedAtValue)
       }
 
       onEvent?.('signed', { fieldId: activeSignatureFieldId, signedAt })
@@ -294,11 +318,25 @@ export function SigningEngine({
     })
 
     const completedAt = new Date().toISOString()
-    const mergedFieldValues = { ...fieldValues }
+    let mergedFieldValues = { ...fieldValues }
     for (const field of recipientFields) {
       if (field.type === 'date' && !mergedFieldValues[field.id]) {
         mergedFieldValues[field.id] = formatDisplayDate(completedAt)
       }
+    }
+
+    const primarySignatureField = recipientFields.find(
+      (field) =>
+        (field.type === 'signature' || field.type === 'initial') &&
+        String(mergedFieldValues[field.id] ?? '').trim(),
+    )
+    if (primarySignatureField) {
+      mergedFieldValues = replicateRecipientSigningFieldValues(
+        recipientFields,
+        mergedFieldValues,
+        primarySignatureField.id,
+        mergedFieldValues[primarySignatureField.id]!,
+      )
     }
 
     const valuesToSubmit = Object.fromEntries(
@@ -338,7 +376,7 @@ export function SigningEngine({
       fields={viewerFields}
       fieldValues={fieldValues}
       fieldSignedAt={fieldSignedAt}
-      activeFieldId={recipientFields[currentFieldIndex]?.id}
+      activeFieldId={requiredFields[currentFieldIndex]?.id}
       readOnlyFieldIds={readOnlyFieldIds}
       getRecipientColor={getRecipientColor}
       onFieldActivate={handleFieldActivate}
